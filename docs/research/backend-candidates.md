@@ -108,7 +108,7 @@ GR00T N1.7 官方部署指南声明：
 
 - [GR00T Deployment & Inference Guide](https://github.com/NVIDIA/Isaac-GR00T/blob/main/scripts/deployment/README.md)
 
-## 初始能力矩阵
+## 已调查事实对照
 
 以下矩阵只总结当前官方资料，不代表代码审计或本地验证：
 
@@ -131,51 +131,4 @@ GR00T N1.7 官方部署指南声明：
 | 许可证 | Runtime Apache-2.0；模型等分别核查 | Runtime Apache-2.0；模型等分别核查 | 代码、模型和传递资产分别核查 |
 | 成熟度 | 新兴项目，需按 commit 和复现评估 | 官方明确仍在 active construction | 官方路径持续演进，平台差异明显 |
 
-## 底层后端候选
-
-只有稳定问题指向算子、图导出、Python 依赖、延迟或资源边界时，才进一步比较：
-
-### 整图 ONNX → TensorRT C++
-
-候选调查点是整图导出范围、动态控制流、Cache、采样、Processor 边界和 Engine 可维护性。GR00T 官方路径已经证明部分或大部分组件可进入 TensorRT，但不同模型和平台不能直接外推。
-
-### 有限分段 TensorRT + C++ 编排
-
-只在现有 Runtime/官方路径的边界造成已复现影响时评估。需要量化子图边界、buffer、同步、正确性和维护成本。
-
-### Torch-TensorRT/LibTorch C++
-
-适用于问题明确指向 Python 服务层但模型仍依赖 PyTorch 图的情况。二进制、平台支持和 CUDA/TensorRT 版本耦合需要实测。
-
-### ONNX Runtime C++ CUDA/TensorRT EP
-
-适用于问题需要统一 C++ API 和受控 fallback 的情况。图分区、内存和尾延迟必须针对固定模型验证。
-
-### ggml/llama.cpp 系 Runtime
-
-`vla.cpp` 和 `Embodied.cpp` 已经提供实际路径。调查重点应是支持边界、正确性、动作语义和工作流影响，而不是重新证明这种路线可以存在。
-
-## Tokenizer 与 Processor 调查
-
-不能预设“缺少 C++ Processor”。应分别核查：
-
-- instruction normalizer、pre-tokenizer、special token 和 chat template；
-- 图像 resize、crop、color、layout 和 normalize；
-- robot state 顺序、单位和统计量；
-- action 反归一化、坐标系和关节顺序；
-- 这些步骤位于 C++ server、客户端还是仿真 adapter；
-- 与官方参考是否使用相同配置和资产；
-- 边界是否在实际工作流中造成错误、重复实现或不可交付性。
-
-固定输入相对预期行为、官方基线、已有测试或相关替代实现的差异及其影响，都可以形成问题证据；是否需要跨实现比较由被选 Issue 决定。
-
-## Problem Discovery 使用方式
-
-1. 先固定被选 Issue、受影响上游 commit、问题原生路径和输入；
-2. 只有问题涉及 Runtime 或后端时，才选择本表中的相关方案并固定 commit 和资产版本；
-3. 将与问题直接相关的 `Unknown` 转化为代码检查或实验问题；
-4. 按根因需要执行跨实现比较、性能测量、动作验证或异常观察，不固定实现语言；
-5. 使用其他现有方案、最新版本和相关 PR 反证；
-6. 决定最小修复、独立立项、向上游贡献或停止/转向。
-
-本文不维护最终选择、生产门禁或架构结论。
+本文只维护已经调查得到的外部项目事实和 `Unknown`。只有被选 Issue 需要时才继续代码检查或复现；不在本文维护候选后端列表、选型流程、生产门禁或架构结论。

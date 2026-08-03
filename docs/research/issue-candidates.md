@@ -11,6 +11,8 @@
 
 Issue 是问题来源，不是项目场景。只有固定版本、本地复现、影响验证和替代方案反证完成后，才能形成项目问题证据。
 
+真实性、本地可复现性、技术深度、硬件成本和已有修复只用于安排调查优先级。Issue 热度、技术趣味、容易修复或适合 C++、CUDA/TensorRT 等工具不增加真实性；当前设备无法复现也不能证明问题不存在。
+
 ## 候选列表
 
 | ID | 问题池 | Issue permalink | 报告用户/工作流 | 真实性 | 本地可复现性 | 技术深度 | 硬件成本 | 已有修复/PR | 决策 |
@@ -30,7 +32,7 @@ Issue 是问题来源，不是项目场景。只有固定版本、本地复现�
 | 硬件成本 | 必须先采购高成本硬件 | 需要临时云资源或可借用设备 | 无新增硬件成本 |
 | 已有修复/PR | 最新版本或已合并 PR 已解决 | 存在 workaround 或活跃 PR，仍需验证 | 没有已知修复，或现有修复不能解决且有证据 |
 
-进入复现准备至少要求真实性和本地可复现性均不为 0。总分相同时，优先选择固定输入更容易、根因更可证伪、影响更可观察且能够形成修复前后回归的候选。实现语言和对照工具不参与问题准入评分。
+进入主动复现准备至少要求真实性和本地可复现性均不为 0；本地可复现性为 0 的线索进入 `Backlog`，不判定为虚假。总分相同时，优先选择固定输入更容易、根因更可证伪且影响更可观察的候选。最小修复、实现语言和对照工具不参与 Issue 准入评分。
 
 ## 单条记录要求
 
@@ -51,8 +53,7 @@ Required model, data, simulator and hardware:
 Expected-behavior or correctness baseline:
 Planned reproduction and diagnostic tools:
 Hypothesized affected layer and implementation language:
-Planned minimal fix and regression:
-Optional vla.cpp / Embodied.cpp comparison when relevant:
+Root-cause questions to test:
 Planned impact validation (numeric / regression / resource / simulation / consumer; mark N/A with reason):
 Triage score and decision:
 ```
@@ -64,6 +65,6 @@ Triage score and decision:
 - `Shortlist`：进入最多两个候选之一，允许准备复现；
 - `Backlog`：问题线索有效，但当前优先级或资源不合适；
 - `Use as counterexample`：已有修复或替代方案，作为反证材料；
-- `Reject`：缺少真实工作流、不可复现、与项目约束无关或属于普通支持问题。
+- `Reject`：缺少真实工作流、已被当前版本或合并修复解决、与调查范围无关、属于普通支持问题或证据表明报告归因不成立。
 
 具体执行顺序、证据链和退出条件见 [Phase 0：Problem Discovery 计划](../plans/phase-0.md)。

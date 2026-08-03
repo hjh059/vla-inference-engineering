@@ -85,9 +85,9 @@ GitHub Issue 可以证明有人报告了特定工作流、现象或影响，是�
 - [项目定位](docs/project/positioning.md)
 - [Problem Discovery 范围](docs/project/scope.md)
 - [Problem Discovery 计划](docs/plans/phase-0.md)
-- [候选架构（非实施依据）](docs/architecture/overview.md)
-- [条件性路线图](docs/project/roadmap.md)
-- [ADR 索引](docs/adr/README.md)
+- [候选 Issue 筛选表](docs/research/issue-candidates.md)
+- [Runtime 与后端生态事实](docs/research/backend-candidates.md)
+- [部署平台与资源策略](docs/research/deployment-platforms.md)
 
 ## 当前限制
 
