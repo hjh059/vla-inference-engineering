@@ -20,9 +20,7 @@
 
 ## 2. 当前项目定位
 
-当前项目不是一个已经确定要建设的 VLA Runtime，而是一项 VLA 部署生态的 Problem Discovery：
-
-> 识别并验证 VLA 推理与机器人部署中一个真实存在、可重复、尚未被现有方案充分解决且值得投入的问题。
+当前项目不是一个已经确定要建设的 VLA Runtime，而是一项 VLA 部署生态的 Problem Discovery。正式调查目标由 [Problem Discovery 范围](scope.md#调查目标)维护。
 
 模型官方参考、上游实现和 Issue 所在工作流是默认调查对象。`vla.cpp`、`Embodied.cpp` 和 GR00T 官方部署路径只在问题相关时作为对照、诊断、修复或上游贡献工具，不是必经路径。
 

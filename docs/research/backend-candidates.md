@@ -18,17 +18,9 @@
 
 未在 README 中找到某项能力时，证据等级为 `Unknown`，不记录为“不支持”。
 
-## 证据等级
+## 证据状态
 
-| 等级 | 含义 |
-|---|---|
-| `Official claim` | 官方仓库、文档或论文明确声明 |
-| `Code inspected` | 已固定 commit 并检查相关代码和调用路径 |
-| `Locally reproduced` | 已在固定本地环境运行成功 |
-| `Locally measured` | 已保存原始输入、日志和测量结果 |
-| `Unknown` | 尚无足够证据 |
-
-当前表格主要是 `Official claim`。仓库内尚无本地复现结果。
+证据等级统一采用 [Problem Discovery 计划中的定义](../plans/phase-0.md#证据规则)。当前内容主要是截至调研日期的 `Official claim`，仓库内尚无本地复现结果。当前来源链接未固定到 commit，因此只作为候选调查输入；某条路径进入正式调查时，必须记录仓库 commit，并补充对应的永久链接。
 
 ## 现有 Runtime 与官方路径
 

@@ -8,7 +8,7 @@
 
 ## 项目动机
 
-希望通过真实 Issue 的复现、根因分析、最小修复和影响验证，证明能够解决 VLA 推理与机器人部署中的实际工程问题。
+项目以真实 Issue 的完整证据链形成可验证的 VLA 部署工程成果；具体动机和能力声明边界见[项目定位](docs/project/positioning.md)。
 
 C++、Python、CUDA/TensorRT、Processor、协议和控制端工程都是已有能力或候选解决工具，具体使用什么由问题决定。面向中高级 C++ AI 推理、GPU 性能工程和机器人部署岗位形成工程证据是预期收益，不是问题准入条件，也不能证明应当建设某一种 Runtime 或机器人闭环。
 
@@ -31,7 +31,7 @@ Problem Discovery 只回答：
 LeRobot / Isaac-GR00T Issue 问题线索
         │
         ▼
-真实性、本地可复现性与已有修复筛选
+线索完整度、用户影响、复现可行性与已有修复筛选
         │
         ▼
 固定候选用户、工作流、版本、输入和环境
@@ -52,32 +52,18 @@ LeRobot / Isaac-GR00T Issue 问题线索
 用替代方案和上游版本反证
         │
         ▼
-Continue / Contribute upstream / Stop or Pivot
+Continue / Contribute upstream / Stop/Pivot
 ```
 
 固定工位拣选、C++ 推理、安全监督和机器人控制可以作为调查场景或候选方案，但在问题证据出现前都不是项目既定目标。详细边界见[项目范围](docs/project/scope.md)，当前执行步骤见 [Problem Discovery 计划](docs/plans/phase-0.md)。
 
-## 证据等级
+## 证据规则
 
-生态调研中的声明必须区分：
-
-- `Official claim`：官方仓库或文档明确声明；
-- `Code inspected`：已经按固定 commit 检查代码；
-- `Locally reproduced`：已经在固定环境复现；
-- `Locally measured`：已经保存本地原始测量结果；
-- `Unknown`：尚无足够证据。
-
-只有由本项目在受控环境中完成的复现和测量可以形成当前项目的问题证据；受控环境可以是当前设备、借用设备、Jetson 或设有费用上限的云资源。公开 benchmark 和 README 只能作为调查输入。
-
-GitHub Issue 可以证明有人报告了特定工作流、现象或影响，是候选问题的来源；它不能单独证明归因正确、问题仍存在、现有方案无法解决或值得独立立项。Issue 必须经过版本核查、本地复现和替代方案反证。
+所有能力和问题声明都按 [Problem Discovery 计划中的证据规则](docs/plans/phase-0.md#证据规则)分类。GitHub Issue、公开 benchmark 和 README 只作为调查输入；未经受控复现、测量和替代方案反证，不能形成当前项目的问题结论。
 
 ## Problem Discovery 退出条件
 
-只有形成以下问题陈述，才能重新定义项目目标并进入架构设计：
-
-> 对于【具体用户】，在使用【现有方案】完成【具体工作】时，会稳定发生【可重复观察的问题】，导致【可量化或明确的影响】。现有【替代方案】因为【证据支持的原因】不能解决。本项目将只解决【问题边界】，并以【可验证指标】判断成败。
-
-同时必须具备问题复现命令、固定输入和环境、原始日志或报告、根因及其证据、最小修复或无法修复的明确结论、回归与影响验证、相关替代方案对照，以及继续、上游贡献、转向或停止的结论。
+只有满足 [Problem Discovery 计划中的 `Continue` 条件](docs/plans/phase-0.md#continue)，才能基于已验证问题重新定义项目目标并进入后续架构或产品化设计；`Contribute upstream` 和 `Stop/Pivot` 也是合法退出结果。
 
 ## 文档
 
