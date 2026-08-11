@@ -1,71 +1,59 @@
-# 部署平台与资源策略调研
+# 部署平台与资源策略
 
-> 状态：Problem Discovery 输入，不是生产平台或采购决策。
->
-> 调研基准日期：2026-08-02。版本、价格和支持矩阵必须在实际复现或采购前重新核对。
+> 状态：本地设备和阿里云 A10 候选环境已于 2026-08-09 完成可行性核验；本文记录设备适用边界与正式环境冻结规则，不是采购计划。
 
-Problem Discovery 默认使用当前本地设备开发和执行最小复现，不以选出“最优生产平台”为目标。稳定问题成立前，可以使用借用设备、Jetson 或有费用上限的临时云 GPU 验证资源假设，但不进行长期硬件采购；只有稳定问题成立并出现可归因的资源阻塞后，才比较长期采购方案。
+## 本地设备核验
 
-## 当前本地基线
+以下事实来自 2026-08-09 的本机只读检查，原始命令与输出保存在 [`environment-check-2026-08-09.txt`](environment-check-2026-08-09.txt)：
 
-以下为 2026-08-02 对当前宿主机的只读检查结果，分类为 `Fact`。它只证明设备清单，不证明任何被选 Issue 路径已经可用：
-
-| 项目 | 当前值 | 调查含义 |
+| 项目 | 当前事实 | 可行性影响 |
 |---|---|---|
-| 设备 | TR 911K 笔记本 | 当前零新增采购成本的开发基线 |
-| CPU | Intel Core i7-7700HQ，4 核 8 线程，支持 AVX2 | 可进行代码检查、构建和小规模 CPU 路径验证 |
-| GPU | NVIDIA GeForce GTX 1060，6 GiB，Compute Capability 6.1 | 可调查小模型或量化路径，但现代 CUDA/TensorRT 支持需要单独核验 |
-| 内存 | 32 GiB DDR4-2400 | 可支持开发、转换和有限规模本地实验 |
-| 存储 | 128 GB SSD + 1 TB HDD | SSD 空间紧张；模型、缓存和日志可放 HDD，但 I/O 测量需排除盘速影响 |
-| 当前系统 | Windows 11 宿主机 + Ubuntu 24.04 WSL | 当前会话无法访问 GPU，不等同于宿主机没有 GPU |
+| CPU | Intel Core i7-7700HQ，4 核 8 线程，支持 AVX2 | 可用于构建、预处理和 CPU 路径检查 |
+| GPU | NVIDIA GeForce GTX 1060，6144 MiB，Compute Capability 6.1；Windows 驱动 572.60 | 候选路径必须核对 Pascal、6 GiB 显存和所需 CUDA/框架版本的兼容性 |
+| 物理内存 | Windows 报告 33,984,040,960 bytes（约 31.65 GiB） | WSL2 当前只可见约 11.68 GiB，不能按全部物理内存规划进程 |
+| 物理存储 | 128 GB SATA SSD + 1 TB SATA HDD | `C:` 当前仅约 10.43 GB 可用；WSL 根文件系统约 1.01 TB 可用，但其物理磁盘映射未核对 |
+| 宿主系统 | Windows 11，版本 10.0.26100 | 保留为宿主环境，不作为 Linux 原生性能数据 |
+| 当前 Linux 环境 | WSL2，Ubuntu 24.04.3 LTS，内核 `6.6.87.2-microsoft-standard-WSL2` | 已满足 Ubuntu 24.04 用户态候选，无需仅为版本号迁移系统 |
+| WSL GPU 状态 | `/dev/dxg` 不存在；`nvidia-smi` 返回 `GPU access blocked by the operating system` | 当前不能在该 WSL 实例执行 GPU smoke test 或 GPU 性能基线 |
+| 当前工具 | CMake 3.28.3、GCC 13.3.0、Python 3.12.3；未找到 `nvcc` 和 Docker | 具体依赖只在选定路径后核对和安装；`nvcc` 缺失不单独证明路径不可运行 |
 
-仓库当前未保存这次设备检查的原始命令输出。相关规格进入正式资源决策前，必须重新执行只读检查并保存原始结果。
+### 本地设备适用边界
 
-后续计划切换到原生 Ubuntu 桌面版。Ubuntu 24.04 LTS 是当前首个兼容性验证候选，不是冻结决策；最终版本必须同时满足 GTX 1060 驱动、CUDA、被选 Issue 路径及相关实现/Runtime 和必要开发工具的兼容性。原生系统安装完成前，GPU 可用性仍为 `Unknown`。
+- `Hypothesis`：GTX 1060 可用于固定版本下的小模型、量化模型或 CPU/CUDA smoke test，具体 `vla.cpp` 模型兼容性仍为 `Unknown`；
+- `Decision`：本机只作为轻量可行性和开发辅助环境，不作为正式 VLA GPU 基线与 profiling 的首选设备；6 GiB 显存、Pascal 架构及当前 WSL GPU 不可用都会限制候选路径；
+- `Official claim`：[CUDA Toolkit 13.0 Release Notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#deprecated-architectures)说明 CUDA 13.0 已移除 Maxwell、Pascal 和 Volta 的离线编译与库支持，CUDA 12.x 仍可为这些架构构建；
+- `Decision`：不为本项目优先迁移本机到原生 Ubuntu 24.04；现有 WSL 已是 Ubuntu 24.04，迁移不能改变 GPU 架构或显存容量。
 
-GTX 1060 属于 Pascal 架构。它不能被默认视为当前 TensorRT 路径的有效基线；实际调查必须固定 CUDA、驱动和 Runtime 版本，并区分“旧版本仍可运行”和“当前上游仍受支持”。
+## 当前云端候选环境
 
-## 已确认的资源策略
+阿里云 `ecs.gn7i-c8g1.2xlarge` 已通过 CUDA 与 profiling 可行性验证，详细记录见[阿里云 A10 环境与 profiling 可行性记录](cloud-environment-check-2026-08-09.md)。
 
-1. **本地优先**：先使用当前设备完成能够执行的问题调查；
-2. **优先级而非真实性**：当前设备不能复现只影响调查顺序，不证明问题不存在；
-3. **分级门禁**：可执行复现暴露资源阻塞后，可以启用临时验证资源；只有稳定问题和长期需求均成立后，才定义采购规格；
-4. **临时验证优先**：在长期采购前，优先使用有费用上限的云 GPU 或借用设备验证资源假设；
-5. **不以采购代替问题发现**：新硬件使路径可运行，不自动证明问题值得独立立项。
-
-## 可用资源选项
-
-| 选项 | 当前角色 | 启用条件 |
+| 项目 | 当前事实 | 证据范围 |
 |---|---|---|
-| 当前设备 | 默认开发与调查环境 | 能执行被选 Issue 的全部或部分复现 |
-| 借用设备或有限额云 GPU | 临时验证显存、GPU 架构或软件兼容性假设 | 已有固定复现、明确资源假设和费用/时间上限 |
-| Jetson | ARM64、JetPack、功耗或设备 I/O 的条件性验证资源 | 被选 Issue 明确涉及这些平台属性 |
-| x86_64 整机升级 | 稳定问题成立后的长期本地开发和较大资源负载 | 临时资源已确认长期需求，且总体成本优于继续租用 |
+| 计算资源 | 8 vCPU、30 GiB、完整 NVIDIA A10 × 1；实测显存 `23028 MiB`，Ampere 架构 | 官方实例规格、NVIDIA 数据表及项目负责人提供的实例检查结果 |
+| 软件环境 | Ubuntu 24.04、驱动 `580.126.09`、CUDA Toolkit `12.8`、Python `3.12.3`、Docker `29.1.3` | 项目负责人提供的环境检查结果 |
+| Profiling | Nsight Systems `2024.6.2` 与 Nsight Compute `2025.1.1.0` 均成功生成报告；硬件计数器访问未出现 `ERR_NVGPUCTRPERM` | 只证明工具、权限和报告导出可用，不构成模型性能结论 |
+| 原始工件 | `.ncu-rep` 与 `.nsys-rep` 当前保存在云实例 `/root` 下 | 尚未持久化到本工作区，实例释放前必须导出 |
 
-以上选项不是生产平台候选排序。无法获得某种资源时，候选 Issue 可以进入 `Backlog`，不能因此标记为虚假或已解决。
+## 正式候选设备筛选条件
 
-## 升级或采购门禁
+当前正式候选设备采用以下筛选条件：
 
-提交任何具体采购建议前必须具备：
+- NVIDIA Ampere 或更新架构；
+- 单卡显存不少于 24 GB；
+- 能运行 Nsight Systems 和 Nsight Compute；
+- 能读取 GPU hardware performance counters 并导出原始 profile 工件。
 
-- 已成立的稳定问题及其直接影响；
-- 固定 Issue、受影响版本、输入、环境和复现命令；
-- 可重复或有充分证据支持的资源阻塞；
-- 与问题相关的显存、系统内存、延迟、磁盘、架构或兼容性指标；
-- 对配置错误、合理替代路径和临时资源的检查；
-- 云 GPU 或借用设备上的一次对照，或说明无法对照的原因；
-- Jetson、整机升级、继续使用本机和云 GPU 的成本—证据收益比较；
-- 采购后能够判定“阻塞已解除”的验收命令和指标。
+16 GB 只作为部分模型可能达到的最低推理线，不作为当前项目的默认筛选线；具体显存需求仍须由选定模型/checkpoint 的固定版本验证。
 
-若没有满足上述条件，结论保持为 `Insufficient evidence`，不确认具体设备。
+## 环境选择与冻结
 
-## 资料
-
-- [JetPack SDK](https://developer.nvidia.com/embedded/jetpack/downloads)
-- [Jetson Orin Nano Super Developer Kit](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/nano-super-developer-kit/)
-- [Jetson Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/)
-- [Jetson Thor](https://www.nvidia.com/en-gb/autonomous-machines/embedded-systems/jetson-thor/)
-- [GR00T 硬件建议](https://github.com/NVIDIA/Isaac-GR00T/blob/main/getting_started/hardware_recommendation.md)
-- [TensorRT 支持矩阵](https://docs.nvidia.com/deeplearning/tensorrt/latest/getting-started/support-matrix.html)
-- [CUDA Toolkit 12.9 Release Notes](https://docs.nvidia.com/cuda/archive/12.9.0/cuda-toolkit-release-notes/index.html)
-- [Torch-TensorRT Releases](https://github.com/pytorch/TensorRT/releases)
+- C-01 已在阿里云 A10 环境通过重复 smoke 并选为正式基线路径；本机仅用于轻量检查和开发辅助；
+- 阿里云 A10 已作为所选路径的正式设备候选，但还不是已冻结的正式基线；创建 `Configuration ID` 后才冻结为正式环境；
+- 当前不购买 GPU，也不迁移本机操作系统；
+- 国产加速卡迁移不进入当前 NVIDIA/CUDA 主闭环；如果后续启动，必须建立新的 `Configuration ID`，不得与 NVIDIA 设备结果组成同一优化前后对比；
+- 只有需要付费资源、反复切换路径或预计投入明显超出合理范围时，才单独评估是否继续；
+- 进入正式测量前，目标设备、操作系统、驱动、CUDA 与 Runtime 版本必须按[正式基线配置](../project/scope.md#正式基线配置)冻结；
+- 优化前后必须使用相同环境与输入；关键环境变化时建立新的 `Configuration ID`；
+- 借用设备或付费资源仅在获得单独授权后使用，并只验证明确的兼容性或资源假设；
+- 本文不预设操作系统迁移、平台选择或硬件采购路线。

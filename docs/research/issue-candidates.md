@@ -1,70 +1,109 @@
-# 候选 Issue 筛选表
+# 路径选择与辅助证据记录
 
-> 状态：Problem Discovery 调查台账。当前尚未收集候选 Issue，也未选定首个复现问题。
+> 状态：可行性选择台账。本文文件名沿用历史链接。
 
-本文只记录真实用户问题的线索和筛选依据，不把 Issue 描述、评论中的归因或建议方案当成已验证事实。首批候选总数不超过 10 个；进入本地复现准备的候选不超过两个，同时只执行一个主复现路径。
+本文只记录选择首个正式部署基线所需的候选路径、公开资料和直接证据。公开 Issue、README、benchmark 或维护者讨论可以帮助解释场景约束、已有路径或已知限制，但不是本项目的性能或正确性证据。
 
-## 问题池顺序
+## 首个候选任务场景
 
-1. **第一问题池：LeRobot Issues**。优先关注 SmolVLA/LIBERO、异步推理、动作语义、Processor、GPU 内存和控制端消费；
-2. **第二问题池：Isaac-GR00T Issues**。重点关注 ONNX/TensorRT、Jetson、跨硬件正确性和性能，不作为默认首个复现路径。
+当前先验证固定离线输入的单请求 VLA 推理，不连接真实机器人，也不形成控制闭环。
 
-Issue 是问题来源，不是项目场景。只有固定版本、本地复现、影响验证和替代方案反证完成后，才能形成项目问题证据。
+| 字段 | 当前定义 |
+|---|---|
+| 可观察目标 | 现有部署路径能够加载固定 checkpoint，接收一组固定观测与语言指令，并产出该路径定义的动作张量或动作序列 |
+| 执行边界 | 单进程、单请求、离线推理；优先使用已通过 profiling 可行性验证的阿里云 A10 24 GB、Ubuntu 24.04 候选环境 |
+| 固定输入 | 一组模型所需的固定图像、语言指令和必要的机器人状态；具体资产在选择模型路径时确定并记录来源与许可证 |
+| Smoke 正确性 | 进程完成模型加载和一次推理；输出类型与形状符合固定版本接口；数值不存在非预期的 `NaN`/`Inf`；有官方参考输出时按其方法比较 |
+| 正式正确性 | 在选择路径后、查看优化结果前，根据上游参考和任务语义冻结；当前为 `Unknown` |
+| 主指标类型 | 单请求端到端延迟，从固定原始输入进入现有部署路径到得到可消费的动作输出 |
+| 资源约束 | 以[部署平台与资源策略](deployment-platforms.md#当前云端候选环境)为准；正式候选路径需在单张 A10 的实测 `23028 MiB` 显存内运行，并兼容 CUDA Toolkit 12.8；本机 GTX 1060 和 CPU 路径只用于辅助检查 |
+| 当前排除 | 训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较 |
 
-线索完整度、用户影响、复现可行性、技术深度和已有修复只用于安排调查优先级。Issue 热度、技术趣味、容易修复或适合 C++、CUDA/TensorRT 等工具不增加问题真实性；当前设备无法复现也不能证明问题不存在。
+该定义只用于筛选首条可运行路径；精确输入资产、正确性阈值、预热、重复次数和测量方法在创建正式 `Configuration ID` 时冻结。
 
-## 候选列表
+## 候选路径记录
 
-| ID | 问题池 | Issue permalink | 报告用户/工作流 | 线索完整度 | 用户影响 | 复现可行性 | 技术深度 | 已有修复/PR | 决策 |
-|---|---|---|---|---:|---:|---:|---:|---:|---|
+| ID | 模型/checkpoint | 现有部署路径 | 候选设备与任务 | 公开资料/固定版本 | 兼容性或 smoke 证据 | 选择依据 | 决策 |
+|---|---|---|---|---|---|---|---|
+| C-01 | SmolVLA-LIBERO 0.6B；GGUF | vla.cpp；C++/CUDA CLI | 阿里云 A10 24 GB；单图像、固定 token、零状态，生成 action chunk | [vla.cpp `7710596`](https://github.com/VinRobotics/vla.cpp/tree/7710596ecf2349a7dcbb41b4f9ce042025cbd435)；[GGUF `349851c`](https://huggingface.co/vrfai/smolvla-libero-gguf/tree/349851cd4e872d199c75e1802f037c8026767190)；[上游 `6721902`](https://huggingface.co/HuggingFaceVLA/smolvla_libero/tree/6721902bc4d61e50a3bfdb11dfb4cb626f05d102) | `Locally reproduced`：A10/CUDA 上独立执行两次，均为 `rows=50 bad_width=0 nonfinite=0`，输出逐值相同 | 已闭合固定输入的 CUDA 单请求推理，满足路径选择所需 smoke 条件 | Selected path |
+| C-02 | π0.5 LIBERO 4B；GGUF | Embodied.cpp；C++/CUDA `vla-server` | 阿里云 A10 24 GB；固定 LIBERO 观测与指令，生成连续动作 | [Embodied.cpp `87bafdc`](https://github.com/SEU-PAISys/Embodied.cpp/tree/87bafdcdda485efb4e0552ee9c979a009970ad6b)；[GGUF `db7fb09`](https://huggingface.co/SEU-PAISys/Embodied.cpp/tree/db7fb09cfcdd90cd12389f290c582e34bb483331/pi05_libero_finetuned_v044)；[上游 `8e17415`](https://huggingface.co/lerobot/pi05_libero_finetuned_v044/tree/8e174154ef5f6c60a8da12ae99c303d8963138c1) | `Official claim`：支持 CUDA 12.x、Ampere 和 π0.5；A10 峰值显存 `Unknown`；`Not run` | 较重模型可能提供更有价值的 GPU profiling 面，但制品许可与显存风险更高 | Candidate（P2） |
+| C-03 | GR00T N1.7 LIBERO `libero_10`；约 3B BF16 | NVIDIA Isaac-GR00T；官方 PyTorch standalone inference | 阿里云 A10 24 GB；`LIBERO_PANDA`、固定 demo trajectory 0/首步，输出动作并与真值比较 | [Isaac-GR00T `b995540`](https://github.com/NVIDIA/Isaac-GR00T/tree/b9955401d50c92a29258732e3ad6ccd579f1bdc0)；[`libero_10` `94a57dd`](https://huggingface.co/nvidia/GR00T-N1.7-LIBERO/tree/94a57dda8a41d792233ef415459864719d10691d/libero_10) | `Official claim`：最低 16 GB+、CUDA 12.6+，并列出 Ampere 支持；`Not run` | 第一方路径和误差输出完整，可作参考/回退；Python 依赖面大于前两条 C++ 路径 | Candidate（P3） |
 
-当前记录数：0 / 10。
+当前记录数：3。
 
-## 评分规则
+## 候选组合详情
 
-每个维度使用 0—2 分。分数用于排序，不代替工程判断。
+### C-01：SmolVLA-LIBERO GGUF + vla.cpp
 
-| 维度 | 0 | 1 | 2 |
-|---|---|---|---|
-| 线索完整度 | 只有结论或功能请求 | 有版本、现象或维护者确认中的一部分 | 用户、工作流、版本、预期/实际、日志或最小示例较完整 |
-| 用户影响 | 没有可观察影响，只有实现偏好 | 有明确不便、资源消耗或潜在正确性影响，但证据有限 | 工作流被阻塞，或存在有证据支持的正确性、可靠性、资源或性能影响 |
-| 复现可行性 | 依赖不可获得的专有资产或未经批准的长期采购，且没有合理替代路径 | 需要有费用上限的云 GPU、借用设备或较多准备 | 当前设备、CPU、小模型或现有公开资产可复现 |
-| 技术深度 | 单纯安装、用法或配置问答 | 需要跨组件定位但边界较浅 | 涉及模型、Processor、Runtime、动作语义、异步调度、GPU 内存、协议、正确性或控制消费 |
-| 已有修复/PR | 最新版本或已合并 PR 已解决 | 存在 workaround 或活跃 PR，仍需验证 | 没有已知修复，或现有修复不能解决且有证据 |
+- **模型与固定制品**：`vrfai/smolvla-libero-gguf@349851cd4e872d199c75e1802f037c8026767190`，上游为 `HuggingFaceVLA/smolvla_libero@6721902bc4d61e50a3bfdb11dfb4cb626f05d102`；模型卡标注约 0.6B 参数；当前固定 revision 已删除独立 `mmproj`，唯一必需的 `smolvla-libero.gguf` 是约 1.13 GB 的单一自包含制品。
+- **固定部署路径**：`VinRobotics/vla.cpp@7710596ecf2349a7dcbb41b4f9ce042025cbd435`；已使用 Release、`GGML_CUDA=ON`、`GGML_CUDA_GRAPHS=ON` 和 `CMAKE_CUDA_ARCHITECTURES=86` 构建。CMake 通过 `FetchContent` 自动获取 `llama.cpp` 标签 `b9866`，对应完整 commit `75a48a90559abf65df3f3616a53bb16e5afb9d07`；不需要 `patches/patch.sh` 或 Git submodule。
+- **固定任务边界**：仓库 `assets/front.jpg`、token `1,100,200,2` 和默认零状态；通过 `vla-cli` 执行单进程、单请求推理并记录原始 action chunk，不接机器人或模拟器。
+- **适配依据**：项目文档声明支持 CUDA 12.x、Ampere 和 SmolVLA，公开示例直接提供单次 CLI 路径。公开性能数字只作为资源可行性线索，不作为本项目基线。
+- **许可与未知项**：运行时代码仓库的 `LICENSE.md` 为 Apache-2.0，上游及 GGUF 模型卡也标注 Apache-2.0；GGUF 模型卡中关于运行时许可的文字与仓库不一致，发布或分发前仍须按固定 revision 复核。当前示例 token 未证明动作语义或 LIBERO 任务成功率，模型是否能形成足以支持后续优化的主要 GPU 热点也尚未验证。
+- **当前决策**：smoke 已通过，选择为正式基线路径；Configuration ID 尚未创建，因此还不是已冻结的正式实验配置。
 
-进入主动复现准备至少要求线索完整度和用户影响均不为 0；复现可行性为 0 的线索进入 `Backlog`，不判定为虚假。总分相同时，优先选择固定输入更容易、根因更可证伪且影响更可观察的候选。技术深度只能用于排序，不能压过用户影响；最小修复、实现语言和对照工具不参与 Issue 准入评分。
+#### 2026-08-11 有限 smoke 证据
 
-## 单条记录要求
+| 项目 | 观察结果 |
+|---|---|
+| 证据等级 | `Locally reproduced`；相同命令独立执行两次 |
+| 运行设备与后端 | NVIDIA A10，Compute Capability 8.6；实际后端为 CUDA device 0 |
+| 模型制品 | 单一自包含 `smolvla-libero.gguf`，约 1.13 GB，无独立 `mmproj` |
+| 模型 SHA-256 | `6fb2d475c98b4c2cef3e27c4eff4e67b483740cbf983fff320a3b8a5e5f74fe8` |
+| 输入图像 SHA-256 | `e6f0738ce9184be421dbade5a73900fb33e44c288c475d3985054fbbc4dfb7cf`（`assets/front.jpg`） |
+| 可执行文件 SHA-256 | `126c401f92252e5f3e688c70815ccf2da2346a59423eabdf284ff6dddd3e4579`（`build-cuda/vla-cli`） |
+| 模型结构 | state 维度 8、action 维度 7、action chunk 长度 50 |
+| CLI 输出契约 | 每行 32 个值，其中后 25 个为对齐填充；共 50 行 |
+| 自动检查 | 两次均为 `rows=50 bad_width=0 nonfinite=0`；两次输出逐值相同 |
+| 资源观察 | 权重缓冲区约 1069.0 MiB；日志内最高已报告 GPU 显存约 1346.2 MiB |
+| 非基线时间 | 首次进程总耗时约 1.79 s，包含进程启动、模型加载和推理 |
 
-候选进入前两名时，除表格摘要外必须补充：
+该证据支持的结论仅为：固定环境能够重复加载单文件 GGUF，通过 CUDA 完成单请求推理，并稳定产生结构正确且无 `NaN`/`Inf` 的动作输出。1.79 s 不代表稳态推理性能；smoke 也不支持动作语义正确或 LIBERO 任务成功率结论。
 
-```text
-Issue ID and permalink:
-Repository and affected version/commit:
-Reporter role or candidate user (mark inference):
-Workflow and expected outcome:
-Observed behavior and direct impact:
-Environment and hardware:
-Logs, reproducer or attached assets:
-Maintainer response and duplicates:
-Workaround, related PR and latest-version status:
-Local reproduction hypothesis:
-Required model, data, simulator and hardware:
-Expected-behavior or correctness baseline:
-Planned reproduction and diagnostic tools:
-Hypothesized affected layer and implementation language:
-Root-cause questions to test:
-Planned impact validation (numeric / regression / resource / simulation / consumer; mark N/A with reason):
-Triage score and decision:
-```
+### C-02：π0.5-LIBERO GGUF + Embodied.cpp
 
-信息缺失时填写 `Unknown`，不得推断为“不支持”或“现有方案无法解决”。
+- **模型与固定制品**：`SEU-PAISys/Embodied.cpp@db7fb09cfcdd90cd12389f290c582e34bb483331` 中的 `pi05_libero_finetuned_v044/pi05.gguf` 与 `pi05-mmproj.gguf`，上游为 `lerobot/pi05_libero_finetuned_v044@8e174154ef5f6c60a8da12ae99c303d8963138c1`，模型卡标注约 4B 参数。
+- **固定部署路径**：`SEU-PAISys/Embodied.cpp@87bafdcdda485efb4e0552ee9c979a009970ad6b`，计划采用 `MODEL_BUILD_VLA_PI05`、CUDA 和 `CMAKE_CUDA_ARCHITECTURES=86` 构建 `vla-server`；输入由其 LIBERO π0.5 配置对应的固定观测提供。
+- **固定任务边界**：从一个固定 LIBERO 样本冻结多视角图像、机器人状态和文本指令，保留服务端原始连续动作输出；不运行完整 episode，也不以任务成功率作为首次 smoke 的门槛。
+- **适配依据**：运行时文档声明支持 CUDA 12.x、π0.5、LIBERO 客户端和 Ampere 构建。其公开相对性能声明缺少本机绝对显存数据，因此不视为 A10 已适配的证据。
+- **许可与未知项**：运行时代码为 Apache-2.0；转换制品页标注 `other`，上游 checkpoint 标注 Gemma 许可，必须在下载前确认组合使用条款。A10 24 GB 峰值显存、转换制品完整性以及服务端与固定输入的最小依赖集合尚未验证；仓库仍在快速演进。
+- **当前决策**：第二顺位。只有 C-01 的 GPU 工作负载过轻，或其输出契约无法满足测量目标时，才优先转向该路径。
+
+### C-03：GR00T N1.7 LIBERO + NVIDIA Isaac-GR00T
+
+- **模型与固定制品**：`nvidia/GR00T-N1.7-LIBERO` 的 `libero_10` 子目录，固定到该目录模型上传 revision `94a57dda8a41d792233ef415459864719d10691d`。后续只取官方部署文档列出的推理文件，不取 optimizer 等训练状态。
+- **固定部署路径**：`NVIDIA/Isaac-GR00T@b9955401d50c92a29258732e3ad6ccd579f1bdc0` 的官方 PyTorch standalone inference；固定 `LIBERO_PANDA`、`demo_data/libero_demo`、trajectory 0 和首个测量步。
+- **固定任务边界**：单进程加载后，对一份固定离线 demo 观测执行有限推理，保存动作、相对真值的 MSE/MAE 与原始时间记录；不启动模拟器，不执行完整轨迹评测。
+- **适配依据**：官方硬件说明将推理最低显存列为 16 GB+、CUDA 12.6+，模型卡列出 Ampere 支持；当前 A10 24 GB、CUDA 12.8 满足这些公开下限，但不等于本地峰值显存已验证。
+- **许可与未知项**：代码为 Apache-2.0，模型使用 NVIDIA Open Model License；下载前需复核固定 revision 的实际文件及适用条款。Python/PyTorch 依赖安装、A10 峰值显存和端到端延迟均未验证。
+- **当前决策**：第三顺位，作为第一方参考与回退路径。它的准确性检查接口最完整，但部署依赖面和环境准备成本高于前两条 C++ 路径。
+
+## 路径选择结果与回退规则
+
+1. C-01 已通过重复 smoke 并选为正式基线路径，下一步冻结 Configuration ID。
+2. 仅当 C-01 无法形成可重复的正式正确性/性能基线，或后续 profile 证明确实缺少可分析的主要 GPU 工作负载时，才重新评估 C-02。
+3. C-03 继续保留为第一方参考/回退路径；当前不继续扩展或 smoke 其他候选。
+
+路径选择不是性能结论。C-01 的代码、模型、输入和当前构建校验和已可核对，但正式正确性标准、预热和测量方法仍待与这些校验和一起写入同一 Configuration ID；在此之前不得将 smoke 时间作为正式基线。
+
+## 选择规则
+
+选择首个正式基线时，只判断与本项目交付直接相关的事项：
+
+1. 路径是否有可核对的模型、checkpoint、许可证和运行说明；
+2. 是否与候选设备、任务场景和资源边界兼容；
+3. 是否能定义可观察的正确性标准和主性能指标；
+4. 是否能在授权资源内完成有限 smoke test 与后续正式测量；
+5. 是否能得到足以定位一个主要瓶颈的端到端测量与 profile 工件。
+
+候选表只维护选择或延期的直接依据。选定路径后，模型/checkpoint、软件版本、输入、正确性标准和测量方法只在[范围文档的正式基线配置](../project/scope.md#正式基线配置)中记录；信息不足时填写 `Unknown`。
 
 ## 决策值
 
-- `Shortlist`：进入最多两个候选之一，允许准备复现；
-- `Backlog`：问题线索有效，但当前优先级或资源不合适；
-- `Use as counterexample`：当前版本、已有修复或替代方案已经解决，并且该结果可用于反证某个活跃候选的假设；
-- `Reject`：缺少真实工作流、与调查范围无关、属于普通支持问题、证据表明报告归因不成立，或者虽已解决但没有保留为反证材料的必要。
+- `Candidate`：信息待核对或可进行有限可行性验证；
+- `Selected path`：有限 smoke 已通过并选为正式基线路径，但 Configuration ID 尚未冻结；
+- `Selected baseline`：已冻结为正式实验配置；
+- `Deferred`：当前资源、兼容性或场景不合适；
+- `Reference only`：仅保留为场景、指标或限制的辅助资料。
 
-具体执行顺序、证据链和退出条件见 [Phase 0：Problem Discovery 计划](../plans/phase-0.md)。
+正式执行步骤、证据规则和完成标准见[端到端部署与性能优化计划](../plans/phase-0.md)。
