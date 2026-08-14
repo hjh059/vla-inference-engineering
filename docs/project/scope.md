@@ -42,6 +42,7 @@ Model and checkpoint:
 Target device and operating system:
 Driver, CUDA and runtime versions:
 Task scenario and fixed input/assets:
+Initial noise or random-seed policy:
 Expected behavior and correctness criteria:
 Primary and secondary metrics:
 Measurement method, warm-up and repeat count:
@@ -53,9 +54,9 @@ Optimized implementation revision and reproduction command:
 Optimization change reference:
 ```
 
-模型/checkpoint、设备、关键软件版本、输入、正确性标准和测量方法是冻结的可比性条件；基线与优化后的实现 revision 是记录在同一 `Configuration ID` 下的对比变量。变更任何冻结条件时，必须建立新的 `Configuration ID`；不得把不同配置的结果作为同一优化前后对比。
+模型/checkpoint、设备、关键软件版本、输入、initial noise 或随机种子策略、正确性标准和测量方法是冻结的可比性条件；基线与优化后的实现 revision 是记录在同一 `Configuration ID` 下的对比变量。变更任何冻结条件时，必须建立新的 `Configuration ID`；不得把不同配置的结果作为同一优化前后对比。
 
-冻结首个配置时，必须在实际实验记录位置建立该 `Configuration ID` 的唯一实例记录；字段定义只在本节维护，具体目录结构可在开始实验时确定。
+冻结首个配置时，必须在 `experiments/<Configuration ID>/` 建立该 `Configuration ID` 的唯一实例记录；字段定义只在本节维护，工件保存规则见[实验记录与工件管理](../../experiments/README.md)。
 
 ## 必须产出
 

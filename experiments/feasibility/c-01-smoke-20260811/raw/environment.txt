@@ -1,0 +1,28 @@
+2026-08-11T21:07:20+08:00
+Linux iZ2zed5grgib2kjbsjqleeZ 6.8.0-111-generic #111-Ubuntu SMP PREEMPT_DYNAMIC Sat Apr 11 23:16:02 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+vla.cpp revision:
+7710596ecf2349a7dcbb41b4f9ce042025cbd435
+GPU:
+NVIDIA A10, 23028 MiB, 580.126.09, 8.6
+CUDA Toolkit:
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Fri_Feb_21_20:23:50_PST_2025
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0
+CMake:
+cmake version 3.28.3
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+Compiler:
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Model:
+6fb2d475c98b4c2cef3e27c4eff4e67b483740cbf983fff320a3b8a5e5f74fe8  /root/vla-smoke-c01/models/smolvla-libero.gguf
+Input:
+e6f0738ce9184be421dbade5a73900fb33e44c288c475d3985054fbbc4dfb7cf  /root/vla-smoke-c01/src/vla.cpp/assets/front.jpg
+Executable:
+126c401f92252e5f3e688c70815ccf2da2346a59423eabdf284ff6dddd3e4579  /root/vla-smoke-c01/build-cuda/vla-cli

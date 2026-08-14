@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：C-01（SmolVLA-LIBERO GGUF + vla.cpp）已在阿里云 A10/CUDA 上通过两次固定输入 smoke 并选为正式基线路径。Configuration ID 尚未冻结；当前证据只支持部署链路与输出结构正确，不构成动作语义、正式性能或优化结果。
+> 当前状态：C-01（SmolVLA-LIBERO GGUF + vla.cpp）已在阿里云 A10/CUDA 上通过两次相同观测条件的 smoke 并选为正式基线路径。两次输出结构均为 50×32 且无非有限值，但 CLI 未固定 initial noise，动作数值并不相同。Configuration ID 尚未冻结；当前证据只支持部署链路与输出结构正确，不构成数值可重复、动作语义、正式性能或优化结果。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 
@@ -77,6 +77,7 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 - [项目定位](docs/project/positioning.md)
 - [部署与性能优化范围](docs/project/scope.md)
 - [部署基线与优化计划](docs/plans/phase-0.md)
+- [实验记录与工件管理](experiments/README.md)
 - [路径选择与辅助证据记录](docs/research/issue-candidates.md)
 - [Runtime 与后端历史参考](docs/research/backend-candidates.md)
 - [部署平台与资源策略](docs/research/deployment-platforms.md)
@@ -84,7 +85,8 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 ## 当前限制
 
 - 正式基线路径及当前制品、输入和可执行文件校验和已记录，但正式正确性标准、预热、测量方法和 `Configuration ID` 尚未冻结；
-- 工作区尚未持久化 C-01 smoke 的原始日志、完整复现命令和输出工件，也尚无正式实验报告；
-- 云实例上的原始 `.ncu-rep`、`.nsys-rep`、最小 kernel 源码和复现命令尚未持久化到本工作区；
+- C-01 的环境记录、依赖与构建命令、两次原始日志、运行命令、校验和与复核摘要已纳入[可行性证据记录](experiments/feasibility/c-01-smoke-20260811/README.md)，但 2026-08-11 安装时的 apt 软件包精确版本没有原始输出，也尚无正式实验报告；
+- 环境 profiling smoke 的原始 `.ncu-rep`、`.nsys-rep`、最小 kernel 源码和复现命令尚未纳入主项目仓库；恢复后须使用 Git LFS 或外部存储，并在 Git 中保存索引和 SHA-256；
+- 工作区根目录不是有效 Git 仓库；根目录中的模型本体、构建产物和临时证据不构成长期归档；
 - C-01 的固定版本兼容性与有限资源观察已核对，但许可证文字差异仍需在发布或分发前复核；
 - 动作语义、LIBERO 任务成功率以及任何正式性能、可靠性、机器人控制或生产可用性结论均未成立。
