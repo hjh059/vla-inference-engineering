@@ -1,0 +1,27 @@
+vla-server: loading model ...
+  ckpt:   models/smolvla-libero.gguf
+vla: arch = smolvla
+vla: config = models/smolvla-libero.gguf (gguf KV)
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 22587 MiB):
+  Device 0: NVIDIA A10, compute capability 8.6, VMM: yes, VRAM: 22587 MiB
+vla: backend = CUDA (device 0)
+vla: [vram] after backend init     used=264.2 MiB  free=22323.4 MiB
+vla: tower weights resident as bf16
+vla: cfg  hidden=960 expert_h=480 expert_inter=1280 n_layers=32 n_img=64 n_lang=48 n_suffix=50 max_state=32 max_action=32
+vla: cfg  real_state_dim=8 real_action_dim=7
+vla: [vram] weight_buf = 1069.0 MiB
+vla: [vram] after weights alloc    used=1334.2 MiB  free=21253.4 MiB  (+1070.0 MiB)
+vla-server: loaded. chunk_size=50  action_dim=32  n_lang=48  hidden=960  expert_h=480  timing_detail=none
+vla-server: bound to tcp://127.0.0.1:5555. ready.
+vla: [vram] gallocr compute buf = 12.8 MiB
+vla: [vram] after gallocr reserve  used=1438.2 MiB  free=21149.4 MiB  (+104.0 MiB)
+vla-server: rid=1  served=1  total=319.2 ms  vision=213.0  inf=98.9  other=7.3
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+vla-server: shutting down (served 6 requests)
+Collecting data...
+Generating '/tmp/nsys-report-7e5e.qdstrm'
+[1/1] [0%                          ] nsys-baseline.nsys-rep[1/1] [0%                          ] nsys-baseline.nsys-rep[1/1] [0%                          ] nsys-baseline.nsys-rep[1/1] [5%                          ] nsys-baseline.nsys-rep[1/1] [===22%                      ] nsys-baseline.nsys-rep[1/1] [========42%                 ] nsys-baseline.nsys-rep[1/1] [==============63%           ] nsys-baseline.nsys-rep[1/1] [=====================86%    ] nsys-baseline.nsys-rep[1/1] [=====================89%    ] nsys-baseline.nsys-rep[1/1] [========================100%] nsys-baseline.nsys-rep[1/1] [========================100%] nsys-baseline.nsys-rep
+Generated:
+    /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/raw/nsys-baseline.nsys-rep

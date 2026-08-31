@@ -1,0 +1,7 @@
+{
+  "warmup": 5,
+  "reps": 30,
+  "output_shape": [50, 32],
+  "all_finite": true,
+  "all_bitwise_equal_reference": true
+}

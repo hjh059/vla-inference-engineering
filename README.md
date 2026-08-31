@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：C-01（SmolVLA-LIBERO GGUF + vla.cpp）已在阿里云 A10/CUDA 上通过两次相同观测条件的 smoke 并选为正式基线路径。两次输出结构均为 50×32 且无非有限值，但 CLI 未固定 initial noise，动作数值并不相同。Configuration ID 尚未冻结；当前证据只支持部署链路与输出结构正确，不构成数值可重复、动作语义、正式性能或优化结果。
+> 当前状态：2026-08-11 的 C-01（SmolVLA-LIBERO GGUF + vla.cpp）A10/CUDA smoke 仅保留为可行性历史证据。当前主机的独立正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成固定-noise 的正确性与 30 样本稳态性能基线；结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。已采集的 Nsight Systems trace 含加载和 warm-up，尚不能独立支持主瓶颈归因或优化结论。历史 smoke 不参与新配置的性能或优化前后比较。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 
@@ -84,7 +84,7 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 
 ## 当前限制
 
-- 正式基线路径及当前制品、输入和可执行文件校验和已记录，但正式正确性标准、预热、测量方法和 `Configuration ID` 尚未冻结；
+- 新正式配置的制品、输入、随机性、正确性标准、预热和测量方法已冻结；正确性与性能原始结果已归档，但尚缺隔离稳态范围的 profile 和任何优化前后结果；
 - C-01 的环境记录、依赖与构建命令、两次原始日志、运行命令、校验和与复核摘要已纳入[可行性证据记录](experiments/feasibility/c-01-smoke-20260811/README.md)，但 2026-08-11 安装时的 apt 软件包精确版本没有原始输出，也尚无正式实验报告；
 - 环境 profiling smoke 的原始 `.ncu-rep`、`.nsys-rep`、最小 kernel 源码和复现命令尚未纳入主项目仓库；恢复后须使用 Git LFS 或外部存储，并在 Git 中保存索引和 SHA-256；
 - 工作区根目录不是有效 Git 仓库；根目录中的模型本体、构建产物和临时证据不构成长期归档；

@@ -1,0 +1,25 @@
+vla-server: loading model ...
+  ckpt:   models/smolvla-libero.gguf
+vla: arch = smolvla
+vla: config = models/smolvla-libero.gguf (gguf KV)
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 22587 MiB):
+  Device 0: NVIDIA A10, compute capability 8.6, VMM: yes, VRAM: 22587 MiB
+vla: backend = CUDA (device 0)
+vla: [vram] after backend init     used=236.2 MiB  free=22351.4 MiB
+vla: tower weights resident as bf16
+vla: cfg  hidden=960 expert_h=480 expert_inter=1280 n_layers=32 n_img=64 n_lang=48 n_suffix=50 max_state=32 max_action=32
+vla: cfg  real_state_dim=8 real_action_dim=7
+vla: [vram] weight_buf = 1069.0 MiB
+vla: [vram] after weights alloc    used=1306.2 MiB  free=21281.4 MiB  (+1070.0 MiB)
+vla-server: loaded. chunk_size=50  action_dim=32  n_lang=48  hidden=960  expert_h=480  timing_detail=none
+vla-server: bound to tcp://127.0.0.1:5555. ready.
+vla: [vram] gallocr compute buf = 12.8 MiB
+vla: [vram] after gallocr reserve  used=1410.2 MiB  free=21177.4 MiB  (+104.0 MiB)
+vla-server: rid=1  served=1  total=274.1 ms  vision=181.2  inf=86.2  other=6.6
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+vla-server: rid=11  served=11  total=67.7 ms  vision=18.9  inf=48.3  other=0.5
+vla-server: rid=21  served=21  total=67.7 ms  vision=18.7  inf=48.6  other=0.5
+vla-server: rid=31  served=31  total=68.3 ms  vision=18.9  inf=48.9  other=0.6
+vla-server: shutting down (served 35 requests)

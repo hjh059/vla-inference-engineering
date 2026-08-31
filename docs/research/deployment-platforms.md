@@ -1,6 +1,6 @@
 # 部署平台与资源策略
 
-> 状态：本地设备和阿里云 A10 候选环境已于 2026-08-09 完成可行性核验；本文记录设备适用边界与正式环境冻结规则，不是采购计划。
+> 状态：历史本地设备与云端检查仍保留其日期和证据边界；2026-08-31 当前主机的 A10/CUDA 配置已冻结为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)，本文记录设备适用边界与正式环境冻结规则，不是采购计划。
 
 ## 本地设备核验
 
@@ -24,14 +24,14 @@
 - `Official claim`：[CUDA Toolkit 13.0 Release Notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#deprecated-architectures)说明 CUDA 13.0 已移除 Maxwell、Pascal 和 Volta 的离线编译与库支持，CUDA 12.x 仍可为这些架构构建；
 - `Decision`：不为本项目优先迁移本机到原生 Ubuntu 24.04；现有 WSL 已是 Ubuntu 24.04，迁移不能改变 GPU 架构或显存容量。
 
-## 当前云端候选环境
+## 当前正式目标环境
 
 阿里云 `ecs.gn7i-c8g1.2xlarge` 已通过 CUDA 与 profiling 可行性验证，详细记录见[阿里云 A10 环境与 profiling 可行性记录](cloud-environment-check-2026-08-09.md)。
 
 | 项目 | 当前事实 | 证据范围 |
 |---|---|---|
-| 计算资源 | 8 vCPU、30 GiB、完整 NVIDIA A10 × 1；实测显存 `23028 MiB`，Ampere 架构 | 官方实例规格、NVIDIA 数据表及项目负责人提供的实例检查结果 |
-| 软件环境 | Ubuntu 24.04、驱动 `580.126.09`、CUDA Toolkit `12.8`、Python `3.12.3`、Docker `29.1.3` | 项目负责人提供的环境检查结果 |
+| 计算资源 | 16 逻辑 CPU（8 核 / 16 线程）、约 58 GiB RAM、完整 NVIDIA A10 × 1；实测显存 `23028 MiB`，Ampere 架构 | 2026-08-31 当前主机采集，见正式配置环境记录 |
+| 软件环境 | Ubuntu 24.04.4、驱动 `580.126.09`、CUDA Toolkit `12.8.93`、Python `3.12.3` | 2026-08-31 当前主机构建与工具采集 |
 | Profiling | Nsight Systems `2024.6.2` 与 Nsight Compute `2025.1.1.0` 均成功生成报告；硬件计数器访问未出现 `ERR_NVGPUCTRPERM` | 只证明工具、权限和报告导出可用，不构成模型性能结论 |
 | 原始工件 | 2026-08-09 记录显示 `.ncu-rep` 与 `.nsys-rep` 当时保存在云实例 `/root` 下；当前可访问性未复核 | 尚未纳入主项目仓库；恢复后使用 Git LFS 或外部存储，并在 Git 中保存索引、大小和 SHA-256 |
 
@@ -48,8 +48,8 @@
 
 ## 环境选择与冻结
 
-- C-01 已在阿里云 A10 环境通过重复 smoke 并选为正式基线路径；本机仅用于轻量检查和开发辅助；
-- 阿里云 A10 已作为所选路径的正式设备候选，但还不是已冻结的正式基线；创建 `Configuration ID` 后才冻结为正式环境；
+- 2026-08-11 C-01 A10 smoke 仅为历史可行性证据；当前主机的 A10/CUDA 以 `a10-cuda-smolvla-20260831-r1` 为唯一正式比较配置；
+- 历史设备、构建产物、随机 smoke 输出及其时间不进入当前配置的性能、profile 或优化前后比较；
 - 当前不购买 GPU，也不迁移本机操作系统；
 - 国产加速卡迁移不进入当前 NVIDIA/CUDA 主闭环；如果后续启动，必须建立新的 `Configuration ID`，不得与 NVIDIA 设备结果组成同一优化前后对比；
 - 只有需要付费资源、反复切换路径或预计投入明显超出合理范围时，才单独评估是否继续；

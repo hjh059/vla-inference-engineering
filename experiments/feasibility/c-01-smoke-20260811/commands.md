@@ -1,12 +1,12 @@
 # C-01 smoke 环境准备、构建与证据采集命令
 
-> 本文记录项目负责人补充的 2026-08-11 历史执行命令，并用 2026-08-14 当前工作区可核对的信息补齐变量值和工作目录。它不是可直接自动执行的安装脚本。
+> 本文记录项目负责人补充的 2026-08-11 历史执行命令，并用 2026-08-14 工作区快照中可核对的信息补齐变量值和工作目录。它不是可直接自动执行的安装脚本。
 
 ## 补齐依据与证据边界
 
 - 现有证据文件名确认 `VLA_EVIDENCE_TAG=20260811-c01`；
 - `build-cuda/CMakeCache.txt` 确认 `CMAKE_HOME_DIRECTORY=/root/vla-smoke-c01/src/vla.cpp`，因此历史命令中的 `cmake -S .` 从该目录执行；
-- 当前工作区 `nproc` 为 8；历史构建命令使用 `--parallel "$(nproc)"`，因此按当前环境解析为 8；
+- 2026-08-14 工作区快照中 `nproc` 为 8；历史构建命令使用 `--parallel "$(nproc)"`。该快照不是 2026-08-11 实际并行度的原始证明，也不适用于 2026-08-31 后的当前主机；
 - 构建缓存确认 Release、Ninja、`GGML_CUDA=ON`、`GGML_CUDA_GRAPHS=ON` 和 `CMAKE_CUDA_ARCHITECTURES=86`；历史配置命令没有显式传入 `GGML_CUDA_GRAPHS`，该值来自当时解析后的缓存；
 - `FetchContent` 工作树确认 `llama.cpp` 为 `75a48a90559abf65df3f3616a53bb16e5afb9d07`；
 - 下方软件包版本来自 2026-08-14 当前工作区，不作为 2026-08-11 安装时版本的原始证明；
@@ -94,7 +94,7 @@ sha256sum \
 
 两次 smoke 的实际运行命令保存在原始日志中，并在本记录的 [`README.md`](README.md#已知构建与运行条件) 汇总。
 
-## 当前工作区解析值
+## 2026-08-14 工作区快照解析值
 
 | 项目 | 2026-08-14 当前值 |
 |---|---|
@@ -109,6 +109,10 @@ sha256sum \
 | `time` | `1.9-0.2build1` |
 | `g++` | `13.3.0-6ubuntu2~24.04.1` |
 | CUDA compiler build | `cuda_12.8.r12.8/compiler.35583870_0` |
+
+## 2026-08-31 当前主机资源快照
+
+当前主机为 16 个逻辑 CPU（8 个物理核、每核 2 线程）和约 58 GiB 内存，无 Swap。完整采集值见 [`current-host-20260831.md`](current-host-20260831.md)。这是后续正式 `Configuration ID` 的候选环境信息，不修改 2026-08-11 smoke 的原始环境证据，也不能与该 smoke 的时间或性能结果混用。
 
 ## 后续显式复现命令
 
@@ -128,7 +132,7 @@ cmake \
 
 cmake \
   --build "$VLA_SMOKE_ROOT/build-cuda" \
-  --parallel 8
+  --parallel 16
 ```
 
 正式 `Configuration ID` 还必须记录当次实际解析的软件包版本、`/etc/os-release`、GPU/驱动、CUDA、依赖 commit、完整命令及新生成的制品 SHA-256；不能直接继承本可行性记录的当前值。
