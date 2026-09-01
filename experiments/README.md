@@ -5,18 +5,17 @@
 ## 仓库职责
 
 - 本仓库管理计划、文档、`Configuration ID`、实验脚本、小型原始日志、CSV/JSON 指标、环境记录和校验和；
-- `vla.cpp` 源码由个人 fork `git@github.com:hjh059/vla.cpp.git` 管理；正式基线固定到 `7710596ecf2349a7dcbb41b4f9ce042025cbd435`，优化以该 fork 上的新 commit 表示；
+- `vla.cpp` 源码由个人 fork `git@github.com:hjh059/vla.cpp.git` 管理；正式基线固定到 `e9e57ea734692bbcb34528fee16318e230ba1100`，优化以该 fork 上的新 commit 表示；
 - 模型本体不提交。本仓库只记录来源、固定 revision、许可证、大小和 SHA-256；
 - `build-cuda/` 等生成物不提交。本仓库只记录构建命令、CMake 选项、工具链版本和可执行文件 SHA-256；
 - 小型文本证据直接提交；大型 `.ncu-rep`、`.nsys-rep` 使用 Git LFS 或外部存储，并在 Git 中保存可定位的索引、大小和 SHA-256。选择外部存储时还必须记录访问条件；
-- 不得只引用工作区根目录中的临时路径作为长期证据。当前根目录不是有效 Git 仓库，其中的 `evidence/`、`models/` 和 `build-cuda/` 均不受版本管理。
+- 不得只引用项目外临时路径作为长期证据。模型本体与构建产物均不受本仓库版本管理，必须在对应正式配置中记录来源、版本、构建配置和 SHA-256。
 
 ## 目录规则
 
-- 正式基线及其优化对比：`experiments/<Configuration ID>/`；
-- 创建 `Configuration ID` 之前的可行性证据：`experiments/feasibility/<record-id>/`。
+- 正式基线及其优化对比：`experiments/<Configuration ID>/`。
 
-可行性记录不能冒充正式基线。冻结配置后，与正式比较有关的配置、命令、原始结果和工件索引必须集中在对应的 `experiments/<Configuration ID>/` 中。
+冻结配置后，与正式比较有关的配置、命令、原始结果和工件索引必须集中在对应的 `experiments/<Configuration ID>/` 中。选路阶段的结论只在项目文档中简要记录，不单独保留实验工件目录。
 
 ## 原始证据规则
 

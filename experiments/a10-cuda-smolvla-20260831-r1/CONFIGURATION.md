@@ -2,9 +2,9 @@
 
 > 状态：已冻结；2026-08-31 已采集正式正确性与稳态性能基线，并保存一次 Nsight Systems trace。基线结果见 [RESULTS.md](RESULTS.md)；任何冻结字段改变均须创建新的 `Configuration ID`。
 
-## 适用范围与历史隔离
+## 适用范围
 
-本记录的正式目标是当前主机上的单张 NVIDIA A10/CUDA 推理。2026-08-11 的 [C-01 smoke](../feasibility/c-01-smoke-20260811/README.md) 只保留为历史可行性证据：不覆盖、不删除，也不进入本配置的性能、profile 或优化前后比较。
+本记录的正式目标是当前主机上的单张 NVIDIA A10/CUDA 推理。
 
 ## 冻结条件
 

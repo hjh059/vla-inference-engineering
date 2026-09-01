@@ -1,6 +1,6 @@
 # 端到端部署与性能优化计划
 
-> 状态：进行中。2026-08-11 C-01 已完成有限可行性选择并保留为历史证据；当前主机的独立正式配置已冻结，接下来采集端到端基线、profiling 和优化验证，不建设通用生产系统。
+> 状态：进行中。当前主机的正式配置已完成端到端、正确性和性能基线；接下来采集隔离稳态 profile、确认主瓶颈并完成优化验证，不建设通用生产系统。
 
 ## 目标
 
@@ -17,8 +17,8 @@
 - [x] 核验本地设备的适用边界；
 - [x] 验证阿里云 A10 候选环境的 CUDA、Nsight Systems、Nsight Compute 和硬件计数器访问能力。
 - [x] 形成 3 组固定 revision 的模型/checkpoint—部署路径候选，记录兼容性依据、未知项和验证顺序。
-- [x] 在 A10/CUDA 上以相同图像、token 和零状态重复完成 C-01 smoke；两次结构检查均通过，但因未固定 initial noise，动作数值不同；据此选择 C-01 为正式基线路径。
-- [x] 创建并冻结当前主机的正式 `Configuration ID`：[`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)；历史 C-01 smoke 不参与其性能或优化比较。
+- [x] 选择 SmolVLA-LIBERO GGUF + vla.cpp 作为正式基线路径；早期 smoke 未固定 initial noise，因此正式配置将 noise 纳入冻结输入。
+- [x] 创建并冻结当前主机的正式 `Configuration ID`：[`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)。
 
 尚未完成：
 
@@ -28,28 +28,9 @@
 - [ ] 实施最小优化；
 - [ ] 完成优化后的正确性回归、前后测量和交付记录。
 
-## 当前交接点（2026-08-14）
+## 当前工作
 
-下一位执行者应以以下文档为权威入口：
-
-- [路径选择记录](../research/issue-candidates.md#c-01smolvlalibero-gguf--vlacpp)：C-01 的固定 revision、构建配置、SHA-256、重复 smoke 结果及结论边界；
-- [C-01 原始 smoke 记录](../../experiments/feasibility/c-01-smoke-20260811/README.md)：环境、两次原始日志、运行命令、工件索引及重新计算的差异；
-- [正式基线配置](../project/scope.md#正式基线配置)：Configuration ID 必须包含的字段和可比性规则；
-- [部署平台与资源策略](../research/deployment-platforms.md#环境选择与冻结)：A10 环境状态与冻结边界；
-- 本文“建立正式基线”一节：正式测量、证据保存和后续 profiling 的执行顺序。
-
-历史 C-01（SmolVLA-LIBERO GGUF + vla.cpp）保留其代码、模型、输入、构建产物校验和和两次原始 smoke 日志；两次均通过 50×32 和有限值检查，但 350 个有效动作值全部不同。代码检查确认 `vla-cli` 未提供 initial noise，SmolVLA 会随机采样，因此原“输出逐值相同”记录已撤回。当前正式依据仅为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)；它尚未形成正式延迟、正确性语义或模型 profile 结论。
-
-下一位执行者按该配置推进“基线采集”，按以下顺序完成：
-
-1. 重新执行并归档新配置的 smoke 原始日志；历史 C-01 日志不作为当前配置工件。
-2. 使用固定 revision 的 `vla-server` 与配置中的固定请求客户端，验证“模型只加载一次、同一进程重复推理”的计时边界；不得用重复启动 `vla-cli` 冒充稳态推理。
-3. 运行配置中冻结的 5 次 warm-up、30 次采样协议，归档 reference actions、逐请求 CSV 和一致性摘要。
-4. 在同一服务和请求条件下采集 profile；profile 运行不混入正式性能样本。
-
-完成本交接阶段的判定条件是：新配置的 smoke、正确性和性能原始结果均已归档，并有同条件 profile 工件。未满足这些条件前，不开始瓶颈判断或优化。
-
-根目录未跟踪的 `tmp.md` 是早期操作草稿，其中 `git submodule` 和 `patches/patch.sh` 步骤已被实际构建事实否定，不得作为复现依据；除非用户另行要求，不修改或删除该文件。
+后续执行以[正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)和[基线结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)为权威入口。下一步是在相同服务、输入与请求条件下采集只覆盖稳定请求范围的 profile；确认主要瓶颈后，再实施最小优化并执行同条件正确性回归与性能比较。
 
 ## 可行性范围控制
 
@@ -152,5 +133,5 @@
 | Runtime 与后端历史参考 | `docs/research/backend-candidates.md` |
 | 历史设备信息与环境冻结规则 | `docs/research/deployment-platforms.md` |
 | 实验记录、脚本、小型原始日志、指标、校验和及大型工件索引 | `experiments/`；规则见[实验记录与工件管理](../../experiments/README.md) |
-| vla.cpp 基线与优化源码 | 个人 fork；基线 `7710596ecf2349a7dcbb41b4f9ce042025cbd435`，优化使用新的 commit |
+| vla.cpp 基线与优化源码 | 个人 fork；基线 `e9e57ea734692bbcb34528fee16318e230ba1100`，优化使用新的 commit |
 | 模型本体与构建产物 | 不提交；只在对应实验记录中保存来源、版本、构建配置、大小和 SHA-256 |

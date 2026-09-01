@@ -1,6 +1,6 @@
 # VLA 推理部署与优化：文档导航
 
-> 当前阶段：历史 C-01 smoke 已完成可行性选择；当前主机的正式配置 [`a10-cuda-smolvla-20260831-r1`](../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成正确性与性能基线，结果见 [RESULTS.md](../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。仍需隔离稳态 profile、主瓶颈确认与优化验证。活跃文档维护后续优化所需的规则、辅助资料和实验记录。
+> 当前阶段：正式配置 [`a10-cuda-smolvla-20260831-r1`](../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成正确性与性能基线，结果见 [RESULTS.md](../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。仍需隔离稳态 profile、主瓶颈确认与优化验证。活跃文档维护后续优化所需的规则、辅助资料和实验记录。
 
 ## 阅读顺序
 

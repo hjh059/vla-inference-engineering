@@ -1,6 +1,6 @@
 # 基线结果：`a10-cuda-smolvla-20260831-r1`
 
-> 采集日期：2026-08-31。所有结论只适用于本配置冻结的模型、输入、固定 noise、A10、驱动、构建产物、单客户端和测量协议；不得与 2026-08-11 C-01 历史 smoke 比较。
+> 采集日期：2026-08-31。所有结论只适用于本配置冻结的模型、输入、固定 noise、A10、驱动、构建产物、单客户端和测量协议。
 
 ## 正确性基线
 
@@ -43,4 +43,4 @@
 | reference actions | `f86a912942bfe5b8777c0c039a824a509468dcec94f21ffe0b7c9a852bbf77ab` |
 | 正确性摘要 | `a6a0b3e3dc12a16a251e6f83fd5f08c8fc57d9baac0d9151d7d9d428903d9e21` |
 
-原始文本日志、CSV、摘要和 reference actions 位于本配置目录。二进制 `.nsys-rep` 与派生 `.sqlite` 当前仅本地保存；提交前应按实验工件规则使用 Git LFS 或外部存储，并保留本页及 `raw/profile-artifacts.sha256` 中的索引和校验和。
+原始文本日志、CSV、摘要、reference actions、二进制 `.nsys-rep` 与派生 `.sqlite` 均已随本配置保存；后两者的索引和校验和见本页及 `raw/profile-artifacts.sha256`。后续新增的大型 profile 工件按实验工件规则使用 Git LFS 或外部存储。

@@ -4,7 +4,7 @@
 >
 > 证据来源：项目负责人提供的云实例执行记录。本文只证明候选环境能够运行 CUDA 与 profiling 工具，不构成模型部署、正确性或性能基线。
 >
-> 后续状态：2026-08-11，C-01 已在同一类 A10 环境通过重复模型 smoke；模型路径的最新证据与结论边界以[路径选择记录](issue-candidates.md#c-01smolvlalibero-gguf--vlacpp)为准。本文下方的 `Unknown` 只表示 2026-08-09 环境检查结束时的状态。
+> 后续状态：当前模型路径的最新证据与结论边界以[正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)及其[结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)为准。本文下方的 `Unknown` 只表示 2026-08-09 环境检查结束时的状态。
 
 ## 实例与软件环境
 
@@ -62,6 +62,6 @@ Nsight Systems 成功采集 CUDA API 与 GPU kernel 时间线，生成：
 - `Locally reproduced`：该受控云环境能够编译并运行最小 CUDA 程序；
 - `Profiled`：Nsight Systems 能导出系统级 trace，Nsight Compute 能采集 kernel 硬件计数器；
 - `Decision`：该环境满足候选 VLA 路径的部署、测量和 GPU profiling 前提；
-- `Unknown`（截至 2026-08-09）：当时尚未验证具体模型/checkpoint 的显存占用、兼容性、正确性和性能；后续 C-01 smoke 只消除了其中的部署兼容性与输出结构不确定性，正式正确性和性能仍未建立。
+- `Unknown`（截至 2026-08-09）：当时尚未验证具体模型/checkpoint 的显存占用、兼容性、正确性和性能；后续正式配置已建立固定输入下的部署兼容性、输出结构、正确性与性能基线。
 
 截至本次检查结束时，原始 `.ncu-rep` 和 `.nsys-rep` 位于云实例的上述路径；当前可访问性尚未复核，且这些文件、最小 kernel 源码和完整复现命令均未纳入主项目仓库。若能恢复，大型报告应使用 Git LFS 或外部存储，并在 Git 中保存索引、大小和 SHA-256；若无法恢复，必须明确标记为不可复查的证据缺口，不能仅凭本摘要形成模型 profile 结论。
