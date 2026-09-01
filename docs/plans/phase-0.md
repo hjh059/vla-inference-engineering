@@ -24,13 +24,112 @@
 
 - [x] 在冻结配置下跑通并归档端到端部署路径；
 - [x] 建立正确性与性能基线；
-- [ ] 采集范围隔离的 profile 并确认一个主要瓶颈；当前已保存含加载与 warm-up 的 Nsight Systems trace，不能单独支撑瓶颈结论；
+- [x] 采集范围隔离的 Nsight Systems profile；`vla-steady-r2` 已对 10 次稳定请求建立 NVTX 范围，见[结果记录](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)；
+- [ ] 仅依据 `vla-steady-r2` 的 `predict rid=3–12` 范围确认一个主要瓶颈；
 - [ ] 实施最小优化；
 - [ ] 完成优化后的正确性回归、前后测量和交付记录。
 
 ## 当前工作
 
-后续执行以[正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)和[基线结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)为权威入口。下一步是在相同服务、输入与请求条件下采集只覆盖稳定请求范围的 profile；确认主要瓶颈后，再实施最小优化并执行同条件正确性回归与性能比较。
+后续执行以[正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)和[基线结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)为权威入口。范围隔离 profile 已采集；下一步是只在 `predict rid=3–12` 中汇总 kernel 与 CUDA API，必要时以 Nsight Compute 验证候选硬件限制。确认主要瓶颈后，再实施最小优化并执行同条件正确性回归与性能比较。
+
+### 隔离稳态 profile 采集方案
+
+现有 `nsys-baseline` 覆盖加载、warm-up 和一次固定请求，且没有请求范围标记。对其 SQLite 的只读审查只能识别尾部的重复 CUDA Graph 调用模式，不能把候选时间段可靠地证明为某个完整请求；因此不得用其全局或候选区间汇总确认稳态主瓶颈。
+
+#### 1. 在 vla.cpp 增加观测标记
+
+CUDA 构建的 `vla-server` 已在 `vla.cpp` 中加入 NVTX 观测标记。每个已解析的有效请求都会在 `vla.profile` domain 中产生外层 `request rid=<id>` 范围；其中的 `vla::predict()` 产生嵌套 `predict rid=<id>` 范围。外层范围覆盖服务端验证、图像解码、推理、响应序列化和 REP reply，嵌套范围只覆盖模型预测。
+
+NVTX 的原理是由应用进程在 CPU 时间线上写入带名称的 begin/end 事件。Nsight Systems 同时记录这些事件、CUDA Runtime API、CUDA Graph 与 GPU kernel/node 活动；同一请求范围内的活动因此可被精确筛选和汇总。`rid` 能将范围与服务端日志、固定客户端请求顺序对应起来。标记不会改变模型、输入、推理计算、响应内容或既有计时；但 Nsight 的追踪本身可能引入观测开销，所以 profile 延迟只能用于检查范围和稳定性，不能替代冻结协议下的 30 次性能基线。
+
+#### 2. 总体流程
+
+后续 profile 始终使用冻结的模型、输入、noise、线程数和 `vla-server` 路径：
+
+1. 启动服务并等待模型加载完成。
+2. 在未开启 Nsight collection 的条件下发送 5 次 warm-up。
+3. 开启 `cuda,nvtx` trace，启用 CUDA Graph node 追踪，并导出 SQLite。
+4. 发送 10 次无额外 warm-up 的顺序固定请求；这 10 次请求都带有 `request`/`predict` 观测范围。
+5. 立即停止 collection，保存 profile、SQLite、10 样本 CSV、工具版本、完整命令和 SHA-256。
+
+#### 3. 具体执行命令
+
+以下命令在 `/root/vla-smoke-c01` 中执行。终端 A 用于启动服务，终端 B 用于请求，终端 C 用于控制 Nsight 会话。
+
+终端 A：启动由 Nsight 会话管理、但尚未开始 collection 的服务。
+
+```bash
+cd /root/vla-smoke-c01
+
+VLA_N_THREADS=16 nsys launch \
+  --session-new vla-steady-r1 \
+  --trace=cuda,nvtx \
+  --cuda-graph-trace=node \
+  --wait=primary \
+  ./build-formal-a10-20260831/vla-server \
+  --bind tcp://127.0.0.1:5555 \
+  models/smolvla-libero.gguf
+```
+
+等待日志出现 `vla-server: bound to tcp://127.0.0.1:5555. ready.`。
+
+终端 B：执行正式采集前的 5 次 warm-up。固定客户端要求 `--reps >= 1`，因此此命令额外发送的 1 次请求不进入 profile 或性能结论。
+
+```bash
+cd /root/vla-smoke-c01
+
+./build-formal-a10-20260831/fixed_request_client \
+  --addr tcp://127.0.0.1:5555 \
+  --image src/vla.cpp/assets/front.jpg \
+  --out /tmp/vla-steady-r1-warmup \
+  --warmup 5 \
+  --reps 1
+```
+
+终端 C：启动范围隔离的 CUDA/NVTX collection，并导出 SQLite。
+
+```bash
+cd /root/vla-smoke-c01
+
+nsys start \
+  --session vla-steady-r1 \
+  --sample=none \
+  --cpuctxsw=none \
+  --export=sqlite \
+  --output /tmp/vla-steady-r1-nsys
+```
+
+终端 B：collection 开始后立即发送 10 次稳定请求。
+
+```bash
+cd /root/vla-smoke-c01
+
+./build-formal-a10-20260831/fixed_request_client \
+  --addr tcp://127.0.0.1:5555 \
+  --image src/vla.cpp/assets/front.jpg \
+  --out /tmp/vla-steady-r1-profile-samples \
+  --warmup 0 \
+  --reps 10
+```
+
+终端 C：客户端结束后立即停止、关闭会话并记录校验和。
+
+```bash
+nsys stop --session vla-steady-r1
+nsys shutdown --session vla-steady-r1
+
+sha256sum \
+  /tmp/vla-steady-r1-nsys.nsys-rep \
+  /tmp/vla-steady-r1-nsys.sqlite \
+  /tmp/vla-steady-r1-profile-samples/samples.csv
+```
+
+最后在终端 A 使用 `Ctrl-C` 停止服务。profile 输出先保留在 `/tmp`；归档时按实验工件规则使用 Git LFS 或外部存储，并在 Git 中保留索引与校验和。
+
+验收条件为：SQLite 中恰有 10 个 `request` 与 10 个嵌套 `predict` 范围；每个 `predict` 范围均包含 CUDA Graph、Runtime 与 GPU kernel/node 活动；仅在这些范围内按请求和汇总两个层级统计 GPU busy、CUDA API 和 kernel/node 时间。profile 中的延迟只用于检查范围和稳定性，不能替代冻结协议下的 30 次性能基线。
+
+若范围内的时间集中于少量 CUDA Graph node 或 kernel，再使用同一范围隔离方式做一次 Nsight Compute 采集，确认硬件限制后才选择最小优化；若 GPU busy 显著低于 `inference`，先检查 CPU 同步、CUDA API、图更新与数据搬运。
 
 ## 可行性范围控制
 

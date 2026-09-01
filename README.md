@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成固定-noise 的正确性与 30 样本稳态性能基线；结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。已采集的 Nsight Systems trace 含加载和 warm-up，尚不能独立支持主瓶颈归因或优化结论。
+> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成固定-noise 的正确性与 30 样本稳态性能基线；结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。已归档含 NVTX 请求范围的隔离稳态 Nsight Systems profile；它支持对 `rid=3–12` 做范围内热点分析，但尚未形成主瓶颈归因或优化结论。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 
