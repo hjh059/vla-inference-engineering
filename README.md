@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成固定-noise 的正确性与 30 样本稳态性能基线；结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。已归档含 NVTX 请求范围的隔离稳态 Nsight Systems profile；它支持对 `rid=3–12` 做范围内热点分析，但尚未形成主瓶颈归因或优化结论。
+> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成固定-noise 的正确性与 30 样本稳态性能基线；结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。已归档含 NVTX 请求范围的隔离稳态 Nsight Systems profile，确认 `vla::predict()` 内 GPU kernel 执行是主要瓶颈层级；尚未形成有 Nsight Compute 硬件计数器支持的细粒度根因或优化结论。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 
@@ -84,8 +84,7 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 
 ## 当前限制
 
-- 新正式配置的制品、输入、随机性、正确性标准、预热和测量方法已冻结；正确性与性能原始结果已归档，但尚缺隔离稳态范围的 profile 和任何优化前后结果；
-- 环境 profiling smoke 的原始 `.ncu-rep`、`.nsys-rep`、最小 kernel 源码和复现命令尚未纳入主项目仓库；恢复后须使用 Git LFS 或外部存储，并在 Git 中保存索引和 SHA-256；
-- 模型本体、构建产物和项目外临时证据不构成长期归档；
+- 新正式配置的制品、输入、随机性、正确性标准、预热和测量方法已冻结；正确性、30 次性能基线与隔离稳态 Nsight Systems 原始工件已归档，但尚无成功的模型 Nsight Compute 报告或任何优化前后结果；
+- 项目工件直接保存在本仓库，并以 SHA-256 索引校验；模型本体、构建产物和项目外临时证据不归档。2026-08-09 的历史 profiling smoke 报告尚未恢复，不构成当前模型结论；
 - 模型与运行时代码的许可证文字差异仍需在发布或分发前按冻结 revision 复核；
 - 动作语义、LIBERO 任务成功率以及任何正式性能、可靠性、机器人控制或生产可用性结论均未成立。

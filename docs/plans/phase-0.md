@@ -25,13 +25,14 @@
 - [x] 在冻结配置下跑通并归档端到端部署路径；
 - [x] 建立正确性与性能基线；
 - [x] 采集范围隔离的 Nsight Systems profile；`vla-steady-r2` 已对 10 次稳定请求建立 NVTX 范围，见[结果记录](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)；
-- [ ] 仅依据 `vla-steady-r2` 的 `predict rid=3–12` 范围确认一个主要瓶颈；
+- [x] 仅依据 `vla-steady-r2` 的 `predict rid=3–12` 范围确认主要瓶颈层级：`vla::predict()` 内的 GPU kernel 执行；
+- [ ] 修正 NCU 的 push/pop NVTX 过滤与子进程采集条件，采集 `convert_unary` 或代表性 CUTLASS `Kernel2` 的硬件计数器，确认细粒度根因；
 - [ ] 实施最小优化；
 - [ ] 完成优化后的正确性回归、前后测量和交付记录。
 
 ## 当前工作
 
-后续执行以[正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)和[基线结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)为权威入口。范围隔离 profile 已采集；下一步是只在 `predict rid=3–12` 中汇总 kernel 与 CUDA API，必要时以 Nsight Compute 验证候选硬件限制。确认主要瓶颈后，再实施最小优化并执行同条件正确性回归与性能比较。
+后续执行以[正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)和[基线结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)为权威入口。范围隔离 profile 已确认 `vla::predict()` 内 GPU kernel 执行是主要瓶颈层级。首次模型 NCU 尝试连接成功但未采到 kernel，详见结果记录；下一步先修正 push/pop NVTX 过滤与子进程采集条件，再分别验证稳定范围内的 `convert_unary` 与代表性 CUTLASS `Kernel2` GEMM，确认一个可优化的细粒度根因。确认后，再实施最小优化并执行同条件正确性回归与性能比较。
 
 ### 隔离稳态 profile 采集方案
 
@@ -130,6 +131,100 @@ sha256sum \
 验收条件为：SQLite 中恰有 10 个 `request` 与 10 个嵌套 `predict` 范围；每个 `predict` 范围均包含 CUDA Graph、Runtime 与 GPU kernel/node 活动；仅在这些范围内按请求和汇总两个层级统计 GPU busy、CUDA API 和 kernel/node 时间。profile 中的延迟只用于检查范围和稳定性，不能替代冻结协议下的 30 次性能基线。
 
 若范围内的时间集中于少量 CUDA Graph node 或 kernel，再使用同一范围隔离方式做一次 Nsight Compute 采集，确认硬件限制后才选择最小优化；若 GPU busy 显著低于 `inference`，先检查 CPU 同步、CUDA API、图更新与数据搬运。
+
+### Nsight Compute 细粒度验证方案
+
+`vla-steady-r2` 已确认 GPU kernel 执行是主要瓶颈层级，其中 CUTLASS `Kernel2` GEMM 与 `convert_unary` 是最大的两个类别。下一步分别对每类采集一个代表性 kernel，使用本机 Nsight Compute `2025.1.1.0` 的 `detailed` section set。该 set 包含 Compute/Memory Workload、Occupancy 和 Speed-of-Light 指标；不使用 `full`，因为它需要采集约 5,895 个指标且超出本次决策需要。
+
+每次采集都从全新服务进程开始，确保固定客户端的 request ID 从 1 递增。客户端执行 `--warmup 5 --reps 1` 时，前 5 次为 warm-up，唯一的计时请求为 `rid=6`。服务端的观测标记由 `nvtxDomainRangePushEx/Pop` 创建，因此 NCU 必须使用 push/pop 语法 `vla.profile@predict rid=6/`（末尾 `/` 不可省略）过滤。NCU kernel replay 可能显著增加该请求耗时，采集结果只用于硬件限制分析，不能写入正式性能比较。
+
+先为两个报告目录创建输出位置：
+
+```bash
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1
+
+mkdir -p raw/vla-steady-r2/ncu-convert-client raw/vla-steady-r2/ncu-gemm-client
+```
+
+#### A. `convert_unary`：验证是否受内存带宽限制
+
+终端 A：以 NCU launch 模式启动服务。此版本的 `launch` 模式只接受进程注入选项；它只需启用 `--nvtx`，随后挂起服务并等待终端 C attach。NVTX 范围、kernel、section 与 graph 采集规则均由 attach 端传入。
+
+```bash
+cd /root/vla-smoke-c01
+
+VLA_N_THREADS=16 ncu \
+  --mode=launch \
+  --port 49152 \
+  --target-processes all \
+  --nvtx \
+  ./build-formal-a10-20260831/vla-server \
+  --bind tcp://127.0.0.1:5555 \
+  models/smolvla-libero.gguf
+```
+
+终端 C：`attach` 模式连接已经以 NCU launch 启动的进程，并在此指定 NVTX 范围、kernel、section 与报告输出。它不接受启动专用的 `--nvtx` 或 `--target-processes`；但接受 `--nvtx-include`。attach 后 NCU 会恢复服务进程。等待终端 A 输出 `ready.`，再执行终端 B。
+
+```bash
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1
+
+ncu \
+  --mode=attach \
+  --hostname 127.0.0.1 \
+  --port 49152 \
+  --nvtx-include 'vla.profile@predict rid=6/' \
+  --nvtx-push-pop-scope process \
+  --kernel-name-base demangled \
+  --kernel-name 'regex:.*convert_unary.*' \
+  --launch-count 1 \
+  --graph-profiling node \
+  --set detailed \
+  --force-overwrite \
+  --export raw/vla-steady-r2/ncu-convert-rid6 \
+  --log-file raw/vla-steady-r2/ncu-convert-rid6.log
+```
+
+终端 B：在服务 `ready.` 后发送唯一包含目标范围的客户端运行。等待 NCU 完成并生成报告，再停止服务。
+
+```bash
+cd /root/vla-smoke-c01
+
+./build-formal-a10-20260831/fixed_request_client \
+  --addr tcp://127.0.0.1:5555 \
+  --image src/vla.cpp/assets/front.jpg \
+  --out src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/raw/vla-steady-r2/ncu-convert-client \
+  --warmup 5 \
+  --reps 1
+```
+
+验收关注 `MemoryWorkloadAnalysis`、`SpeedOfLight` 和 `Occupancy`：若实际内存带宽接近理论峰值、计算吞吐明显未饱和，则支持转换受带宽限制；否则不能把它归因为带宽瓶颈。
+
+#### B. CUTLASS `Kernel2` GEMM：验证计算或形状限制
+
+完整重复 A 的三终端顺序并使用相同的 fresh server 与 `--warmup 5 --reps 1`。终端 A 与 `convert_unary` 采集完全相同；仅替换终端 C 的 kernel 过滤与报告输出路径：
+
+```bash
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1
+
+ncu \
+  --mode=attach \
+  --hostname 127.0.0.1 \
+  --port 49152 \
+  --nvtx-include 'vla.profile@predict rid=6/' \
+  --nvtx-push-pop-scope process \
+  --kernel-name-base demangled \
+  --kernel-name 'regex:.*cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4.*' \
+  --launch-count 1 \
+  --graph-profiling node \
+  --set detailed \
+  --force-overwrite \
+  --export raw/vla-steady-r2/ncu-gemm-rid6 \
+  --log-file raw/vla-steady-r2/ncu-gemm-rid6.log
+```
+
+终端 B 的输出目录改为 `raw/vla-steady-r2/ncu-gemm-client`。验收关注 Tensor Core/计算吞吐、占用率、内存吞吐和实际问题规模；只有计算吞吐接近设备上限时，才把该 kernel 归因为计算受限。若报告显示小矩阵形状或低占用率限制吞吐，应优先考虑图级 fusion、布局或 batch/shape 取舍，而不是直接改 CUDA kernel。
+
+每次采集后保存 `.ncu-rep`、NCU 文本日志和客户端输出到 `raw/vla-steady-r2/`，执行 `sha256sum` 更新工件索引。若 NCU 报告“没有匹配 kernel”或出现计数器权限错误，保留完整日志并停止该结论分支；这只能说明过滤条件或环境待修正，不能据此判断性能根因。
 
 ## 可行性范围控制
 

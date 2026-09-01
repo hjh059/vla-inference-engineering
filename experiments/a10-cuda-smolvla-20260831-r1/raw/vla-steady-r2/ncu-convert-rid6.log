@@ -1,0 +1,8 @@
+==PROF== Finding attachable processes on host 127.0.0.1.
+==PROF== Attaching to process '/root/vla-smoke-c01/build-formal-a10-20260831/vla-server' (19616) on port 49152.
+==PROF== Connected to process 19616 (/root/vla-smoke-c01/build-formal-a10-20260831/vla-server)
+==PROF== Trying to shutdown target application
+==WARNING== No kernels were profiled.
+==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
+==WARNING== Note that specified NVTX include expressions match only start/end ranges.
+==WARNING== Refer https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html#nvtx-filtering for NVTX Filtering usage.

@@ -11,5 +11,9 @@
 | `samples.csv` | 10 个正式请求的原始客户端与服务端时间 | `8dd0f27c992afe41ed69bbee0e44d4462341593262a2601b82fd0bb3f481f7be` |
 | `summary.json` | 本次固定请求的形状、有限性和按位一致性摘要 | `c632d6079708d67cf950a8199393e5b8229e8d25ff55b2b966c0e2fd83f042ec` |
 | `reference-actions.txt` | 本次固定请求的 reference action | `f86a912942bfe5b8777c0c039a824a509468dcec94f21ffe0b7c9a852bbf77ab` |
+| `ncu-convert-rid6.log` | NCU `convert_unary` 首次尝试日志；已连接但未采到 kernel，无 `.ncu-rep` | `b1bcd81af63dc411b47ebf1990ce482499f2cd5b4664d2b431d715213308b36f` |
+| `ncu-convert-client/samples.csv` | 失败尝试期间的唯一计时请求；仅作正确性/执行记录，不可作性能比较 | `d4d74f64b52ef74d842160a11a9eb89ec3f88145c00b32de3f1d3b1cc75c704e` |
+| `ncu-convert-client/summary.json` | 失败尝试期间的形状、有限性和按位一致性摘要 | `14ffa8156c4df6d68886160b8f79bf82f3ed9a6db53644650fea43f54dfa6622` |
+| `ncu-convert-client/reference-actions.txt` | 失败尝试使用的 reference action | `f86a912942bfe5b8777c0c039a824a509468dcec94f21ffe0b7c9a852bbf77ab` |
 
-这些 profile 时间仅支持热点与等待关系分析，不是正式性能基线，也尚未单独支持主要瓶颈或优化结论。
+NCU 尝试未生成硬件计数器报告；其失败原因、修正命令和结论边界见上级 `RESULTS.md` 与执行计划。所有 profile 时间仅支持热点与等待关系分析，不是正式性能基线，也尚未单独支持优化结论。

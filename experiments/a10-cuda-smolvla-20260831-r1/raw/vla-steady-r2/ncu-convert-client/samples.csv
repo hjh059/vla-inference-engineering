@@ -1,0 +1,2 @@
+sample,client_wall_ms,server_total_ms,server_vision_ms,server_inference_ms,server_prefill_ms,server_denoise_ms,bitwise_equal_reference
+0,230.744348,227.590042,22.0154839,204.929977,0,0,true
