@@ -2,40 +2,34 @@
 
 > 状态：路径选择已完成。本文保留选定路径、候选回退路径与相关辅助证据；文件名沿用历史链接。
 
-本文记录正式基线路径、候选回退路径、公开资料和直接证据。公开 Issue、README、benchmark 或维护者讨论可以帮助解释场景约束、已有路径或已知限制，但不是本项目的性能或正确性证据。
+本文只记录正式基线路径的选择理由、候选回退路径和辅助外部资料。公开 Issue、README、benchmark 或维护者讨论可以帮助解释场景约束、已有路径或已知限制，但不是本项目的性能或正确性证据。选定路径的冻结条件与结果只链接到对应的正式实验记录，不在本文重复维护。
 
-## 正式任务场景
+## 决策准则
 
-当前正式配置验证固定离线输入的单请求 VLA 推理，不连接真实机器人，也不形成控制闭环。
+选择首个正式基线时，仅评估能否在资源边界内完成一条离线、单进程、单客户端顺序请求的 VLA 推理路径；不连接真实机器人，也不形成控制闭环。候选必须：
 
-| 字段 | 当前定义 |
-|---|---|
-| 可观察目标 | 现有部署路径能够加载固定 checkpoint，接收一组固定观测与语言指令，并产出该路径定义的动作张量或动作序列 |
-| 执行边界 | 单进程、单客户端顺序请求、离线推理；当前正式环境为 A10/CUDA，完整条件见正式配置 |
-| 固定输入 | 图像、token、状态及 initial noise 均已在正式配置中冻结，并记录来源与许可证边界 |
-| Smoke 正确性 | 进程完成模型加载和一次推理；输出类型与形状符合固定版本接口；数值不存在非预期的 `NaN`/`Inf`；有官方参考输出时按其方法比较 |
-| 正式正确性 | 已冻结为输出结构、有限性、填充契约与固定输入下的按位一致性；30 个样本验证结果见正式配置与结果 |
-| 主指标类型 | 单请求端到端延迟，从固定原始输入进入现有部署路径到得到可消费的动作输出 |
-| 资源约束 | 以[部署平台与资源策略](deployment-platforms.md#当前正式目标环境)为准；正式路径在单张 A10 的实测 `23028 MiB` 显存内运行，并使用 CUDA Toolkit 12.8；本机 GTX 1060 和 CPU 路径只用于辅助检查 |
-| 当前排除 | 训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较 |
+1. 有可核对的模型、checkpoint、许可证和运行说明；
+2. 能加载候选 checkpoint，接收观测与语言指令，并产出其接口定义的动作张量或动作序列；
+3. 与候选设备、任务场景和资源边界兼容，并能在授权资源内完成有限 smoke test 与后续正式测量；
+4. 能定义接口/结构正确性标准和单请求端到端主指标；
+5. 能取得足以定位一个主要瓶颈的端到端测量与 GPU profile 工件。
 
-精确输入资产、正确性标准、预热、重复次数和测量方法已在正式 `Configuration ID` 中冻结。
+候选设备还须满足[正式候选设备筛选条件](deployment-platforms.md#正式候选设备筛选条件)。训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较不属于首次选路范围。已选路径的实际设备、模型、输入、正确性标准、测量协议与结果以正式 [Configuration ID](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 及其 [RESULTS.md](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md) 为准。
 
-## 候选路径记录
+## 候选目录
 
-| ID | 模型/checkpoint | 现有部署路径 | 候选设备与任务 | 公开资料/固定版本 | 兼容性或 smoke 证据 | 选择依据 | 决策 |
-|---|---|---|---|---|---|---|---|
-| C-01 | SmolVLA-LIBERO 0.6B；GGUF | vla.cpp；C++/CUDA `vla-server` | 当前 A10；固定图像、token、状态与 noise，生成 action chunk | [正式配置](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) | `Locally measured`：固定输入下完成正确性与 30 样本稳态性能基线，详见[结果](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md) | 当前正式基线 | Selected baseline |
-| C-02 | π0.5 LIBERO 4B；GGUF | Embodied.cpp；C++/CUDA `vla-server` | 阿里云 A10 24 GB；固定 LIBERO 观测与指令，生成连续动作 | [Embodied.cpp `87bafdc`](https://github.com/SEU-PAISys/Embodied.cpp/tree/87bafdcdda485efb4e0552ee9c979a009970ad6b)；[GGUF `db7fb09`](https://huggingface.co/SEU-PAISys/Embodied.cpp/tree/db7fb09cfcdd90cd12389f290c582e34bb483331/pi05_libero_finetuned_v044)；[上游 `8e17415`](https://huggingface.co/lerobot/pi05_libero_finetuned_v044/tree/8e174154ef5f6c60a8da12ae99c303d8963138c1) | `Official claim`：支持 CUDA 12.x、Ampere 和 π0.5；A10 峰值显存 `Unknown`；`Not run` | 较重模型可能提供更有价值的 GPU profiling 面，但制品许可与显存风险更高 | Candidate（P2） |
-| C-03 | GR00T N1.7 LIBERO `libero_10`；约 3B BF16 | NVIDIA Isaac-GR00T；官方 PyTorch standalone inference | 阿里云 A10 24 GB；`LIBERO_PANDA`、固定 demo trajectory 0/首步，输出动作并与真值比较 | [Isaac-GR00T `b995540`](https://github.com/NVIDIA/Isaac-GR00T/tree/b9955401d50c92a29258732e3ad6ccd579f1bdc0)；[`libero_10` `94a57dd`](https://huggingface.co/nvidia/GR00T-N1.7-LIBERO/tree/94a57dda8a41d792233ef415459864719d10691d/libero_10) | `Official claim`：最低 16 GB+、CUDA 12.6+，并列出 Ampere 支持；`Not run` | 第一方路径和误差输出完整，可作参考/回退；Python 依赖面大于前两条 C++ 路径 | Candidate（P3） |
-
-当前记录数：3。
+| ID | 当前决策 | 详情 |
+|---|---|---|
+| C-01 | `Selected baseline` | [SmolVLA-LIBERO GGUF + vla.cpp](#c-01smolvla-libero-gguf--vlacpp) |
+| C-02 | `Candidate`（P2） | [π0.5-LIBERO GGUF + Embodied.cpp](#c-02π05-libero-gguf--embodiedcpp) |
+| C-03 | `Candidate`（P3） | [GR00T N1.7 LIBERO + NVIDIA Isaac-GR00T](#c-03groot-n17-libero--nvidia-isaac-groot) |
 
 ## 候选组合详情
 
 ### C-01：SmolVLA-LIBERO GGUF + vla.cpp
 
 - **正式配置与结果**：模型制品、运行时版本、构建选项、输入、固定 noise 及正确性和测量协议以 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 为准；可复现结果见 [RESULTS.md](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。
+- **选路期外部入口**：[vla.cpp 仓库](https://github.com/VinRobotics/vla.cpp)、[架构说明](https://github.com/VinRobotics/vla.cpp/blob/main/docs/ARCHITECTURE.md)和[项目页面](https://fai-modelopt-tech.github.io/vla-cpp.github.io/)。
 - **历史决策摘要**：冻结正式配置前的早期 smoke 使用的 CLI 不能传入 initial noise，动作数值不能重复。因此正式客户端将 noise 作为冻结输入，并把按位一致性纳入正确性标准；原始 smoke 工件不再单独保留。
 - **许可与边界**：模型与运行时代码的许可证文字仍须在发布或分发前按冻结 revision 复核。固定输入下的数值可重复性不代表动作语义、LIBERO 任务成功率或机器人控制正确性。
 
@@ -65,18 +59,6 @@
 
 路径选择不是性能结论。性能、正确性和 profile 结论均以正式配置中冻结的输入、随机性、环境和测量方法为准。
 
-## 选择规则
-
-选择首个正式基线时，只判断与本项目交付直接相关的事项：
-
-1. 路径是否有可核对的模型、checkpoint、许可证和运行说明；
-2. 是否与候选设备、任务场景和资源边界兼容；
-3. 是否能定义可观察的正确性标准和主性能指标；
-4. 是否能在授权资源内完成有限 smoke test 与后续正式测量；
-5. 是否能得到足以定位一个主要瓶颈的端到端测量与 profile 工件。
-
-候选表只维护选择或延期的直接依据。选定路径后，模型/checkpoint、软件版本、输入、正确性标准和测量方法只在[范围文档的正式基线配置](../project/scope.md#正式基线配置)中记录；信息不足时填写 `Unknown`。
-
 ## 决策值
 
 - `Candidate`：信息待核对或可进行有限可行性验证；
@@ -85,4 +67,4 @@
 - `Deferred`：当前资源、兼容性或场景不合适；
 - `Reference only`：仅保留为场景、指标或限制的辅助资料。
 
-正式执行步骤、证据规则和完成标准见[端到端部署与性能优化计划](../plans/phase-0.md)。
+当前进度与下一步见[端到端部署与性能优化计划](../plans/phase-0.md)；证据强度和测量规则见[文档导航](../README.md#证据强度)，交付要求见[部署与性能优化范围](../project/scope.md#必须产出)。

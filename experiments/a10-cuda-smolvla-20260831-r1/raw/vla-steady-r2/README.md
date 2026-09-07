@@ -1,19 +1,34 @@
-# `vla-steady-r2`：隔离稳态 Nsight Systems 工件
+# `vla-steady-r2`：隔离稳态 profile 工件
 
-采集于 2026-09-01，用于正式配置 `a10-cuda-smolvla-20260831-r1` 的稳定请求范围切片。完整条件、范围验收、关键数据和结论边界见上级目录的 [RESULTS.md](../../RESULTS.md)。
+采集于 2026-09-01，用于正式配置 `a10-cuda-smolvla-20260831-r1` 的稳定请求范围切片。完整条件、范围验收、关键数据和结论边界见上级目录的 [PROFILE-ANALYSIS.md](../../PROFILE-ANALYSIS.md)；观测构建、Nsight Systems 和 Nsight Compute 的复现入口分别见 [PROFILE-BUILD.md](../../PROFILE-BUILD.md)、[NSYS-RUNBOOK.md](../../NSYS-RUNBOOK.md) 和 [NCU-RUNBOOK.md](../../NCU-RUNBOOK.md)。
 
 服务加载完成后在 collection 外执行 5 次 warm-up；collection 开始后，`rid=1–2` 是丢弃请求，`rid=3–12` 是用于后续 kernel/CUDA API 汇总的 10 个正式稳定请求。每个请求包含 `vla.profile` NVTX domain 下的 `request rid=<id>` 和嵌套 `predict rid=<id>` 范围。
 
-| 工件 | 用途 | SHA-256 |
-|---|---|---|
-| `nsys.nsys-rep` | 原始 Nsight Systems 报告 | `a75a1c62b4397fa1fb56eea6a4e335967c215f3e2a36366bea6a02bc13b827e2` |
-| `nsys.sqlite` | Nsight Systems 导出的可查询数据库 | `b8998f238099dbb6687b7fcd8216f50ce3e5c28a0c782b1475de7b4b0c55d129` |
-| `samples.csv` | 10 个正式请求的原始客户端与服务端时间 | `8dd0f27c992afe41ed69bbee0e44d4462341593262a2601b82fd0bb3f481f7be` |
-| `summary.json` | 本次固定请求的形状、有限性和按位一致性摘要 | `c632d6079708d67cf950a8199393e5b8229e8d25ff55b2b966c0e2fd83f042ec` |
-| `reference-actions.txt` | 本次固定请求的 reference action | `f86a912942bfe5b8777c0c039a824a509468dcec94f21ffe0b7c9a852bbf77ab` |
-| `ncu-convert-rid6.log` | NCU `convert_unary` 首次尝试日志；已连接但未采到 kernel，无 `.ncu-rep` | `b1bcd81af63dc411b47ebf1990ce482499f2cd5b4664d2b431d715213308b36f` |
-| `ncu-convert-client/samples.csv` | 失败尝试期间的唯一计时请求；仅作正确性/执行记录，不可作性能比较 | `d4d74f64b52ef74d842160a11a9eb89ec3f88145c00b32de3f1d3b1cc75c704e` |
-| `ncu-convert-client/summary.json` | 失败尝试期间的形状、有限性和按位一致性摘要 | `14ffa8156c4df6d68886160b8f79bf82f3ed9a6db53644650fea43f54dfa6622` |
-| `ncu-convert-client/reference-actions.txt` | 失败尝试使用的 reference action | `f86a912942bfe5b8777c0c039a824a509468dcec94f21ffe0b7c9a852bbf77ab` |
+## Nsight Systems 与请求证据
 
-NCU 尝试未生成硬件计数器报告；其失败原因、修正命令和结论边界见上级 `RESULTS.md` 与执行计划。所有 profile 时间仅支持热点与等待关系分析，不是正式性能基线，也尚未单独支持优化结论。
+| 工件 | 大小（bytes） | 用途 |
+|---|---:|---|
+| `nsys.nsys-rep` | 6,861,051 | 原始 Nsight Systems 报告 |
+| `nsys.sqlite` | 18,415,616 | Nsight Systems 导出的可查询数据库 |
+| `samples.csv` | 671 | 10 个正式请求的原始客户端与服务端时间 |
+| `summary.json` | 121 | 本次固定请求的形状、有限性和按位一致性摘要 |
+| `reference-actions.txt` | 7,258 | 本次固定请求的 reference action |
+
+## NCU `convert_unary`
+
+| 工件 | 大小（bytes） | 用途 |
+|---|---:|---|
+| `ncu-convert-rid6.ncu-rep` | 508,999 | NCU `convert_unary` 的 18-pass `detailed` 硬件计数器报告 |
+| `ncu-convert-rid6.log` | 609 | NCU `convert_unary` 采集日志 |
+| `ncu-convert-client/samples.csv` | 190 | `convert_unary` 采集期间的唯一计时请求；仅作正确性/执行记录，不可作性能比较 |
+| `ncu-convert-client/summary.json` | 120 | `convert_unary` 采集期间的形状、有限性和按位一致性摘要 |
+| `ncu-convert-client/reference-actions.txt` | 7,258 | `convert_unary` 采集使用的 reference action |
+
+## NCU CUTLASS `Kernel2` GEMM
+
+| 工件 | 大小（bytes） | 用途 |
+|---|---:|---|
+| `ncu-gemm-rid6.ncu-rep` | 9,011,541 | NCU CUTLASS `Kernel2` GEMM 的 18-pass `detailed` 硬件计数器报告 |
+| `ncu-gemm-rid6.log` | 595 | NCU CUTLASS `Kernel2` GEMM 采集日志 |
+
+两个 NCU 报告都以 `vla.profile@predict rid=6/` 的 push/pop 范围过滤目标 kernel。硬件计数器结论、适用边界及后续工作见上级 [PROFILE-ANALYSIS.md](../../PROFILE-ANALYSIS.md)。所有 profile 时间仅支持热点与硬件限制分析，不是正式性能基线，也不单独支持优化结论。全部 profile 工件的字节身份只在 [`../profile-artifacts.sha256`](../profile-artifacts.sha256) 中维护。

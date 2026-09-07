@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成固定-noise 的正确性与 30 样本稳态性能基线；结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。已归档含 NVTX 请求范围的隔离稳态 Nsight Systems profile，确认 `vla::predict()` 内 GPU kernel 执行是主要瓶颈层级；尚未形成有 Nsight Compute 硬件计数器支持的细粒度根因或优化结论。
+> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成正确性与性能基线、隔离稳态 Nsight Systems profile 和两个代表性 kernel 的 Nsight Compute 采集。下一步选择并实施最小优化，再执行同条件正确性回归和性能比较；尚无优化收益结论。基线结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)，profile 证据和边界见 [PROFILE-ANALYSIS.md](experiments/a10-cuda-smolvla-20260831-r1/PROFILE-ANALYSIS.md)。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 
@@ -14,18 +14,7 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 
 ## 项目目标
 
-项目分为两个阶段：
-
-1. **可行性选择**：在资源与时间边界内核对现有路径，以有限的 smoke test 选择一条可运行的模型—设备—任务路径；这一阶段不形成正式性能结论。
-2. **基线与优化**：按[正式基线配置](docs/project/scope.md#正式基线配置)冻结可比性条件，完成端到端部署、基线测量、profiling、单一主瓶颈优化以及前后验证。
-
-正式交付必须说明：
-
-- 选择该场景、主指标和现有部署路径的依据；
-- 固定环境、输入、运行命令和正确性标准；
-- 优化前后的原始测量、汇总方法和 profile 工件；
-- 主瓶颈、优化机制及其因果证据；
-- 改进范围、未验证项和适用边界。
+项目分为可行性选择与基线优化两个阶段：先以有限 smoke test 选择一条可运行的模型—设备—任务路径，再在冻结配置下完成端到端基线、profiling、单一主瓶颈优化及前后验证。规范性的两阶段范围、冻结字段和交付要求只在[部署与性能优化范围](docs/project/scope.md)维护。
 
 ## 实施闭环
 
@@ -64,27 +53,22 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 
 ## 完成标准
 
-- 现有路径能在固定环境与输入下重复运行；
-- 正确性基线明确，优化后没有回归；
-- 性能指标、测量方法、原始结果和汇总方法可复现；
-- profile 支持对一个主要瓶颈的判断；
-- 优化与该瓶颈具有可说明的因果关系；
-- 优化前后在同一实验配置下测量，并记录改进与限制。
+正式完成标准和必须产出见[项目范围的“必须产出”](docs/project/scope.md#必须产出)；本页只维护仓库入口、状态摘要和导航。
 
 ## 文档
 
 - [文档导航](docs/README.md)
+- [推理路径与输出正确性（可选入门）](docs/concepts/inference-path-and-correctness.md)
+- [可复现实验、测量与 profiling（可选入门）](docs/concepts/reproducible-measurement-and-profiling.md)
 - [项目定位](docs/project/positioning.md)
 - [部署与性能优化范围](docs/project/scope.md)
 - [部署基线与优化计划](docs/plans/phase-0.md)
 - [实验记录与工件管理](experiments/README.md)
 - [路径选择与辅助证据记录](docs/research/issue-candidates.md)
-- [Runtime 与后端历史参考](docs/research/backend-candidates.md)
 - [部署平台与资源策略](docs/research/deployment-platforms.md)
 
 ## 当前限制
 
-- 新正式配置的制品、输入、随机性、正确性标准、预热和测量方法已冻结；正确性、30 次性能基线与隔离稳态 Nsight Systems 原始工件已归档，但尚无成功的模型 Nsight Compute 报告或任何优化前后结果；
 - 项目工件直接保存在本仓库，并以 SHA-256 索引校验；模型本体、构建产物和项目外临时证据不归档。2026-08-09 的历史 profiling smoke 报告尚未恢复，不构成当前模型结论；
 - 模型与运行时代码的许可证文字差异仍需在发布或分发前按冻结 revision 复核；
-- 动作语义、LIBERO 任务成功率以及任何正式性能、可靠性、机器人控制或生产可用性结论均未成立。
+- 当前正式性能结论仅限冻结配置下的单请求稳态基线；优化收益、动作语义、LIBERO 任务成功率、跨设备或跨输入泛化、可靠性、机器人控制和生产可用性结论均未成立。

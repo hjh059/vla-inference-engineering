@@ -1,0 +1,6 @@
+==PROF== Finding attachable processes on host 127.0.0.1.
+==PROF== Attaching to process '/root/vla-smoke-c01/build-formal-a10-20260831/vla-server' (7325) on port 49152.
+==PROF== Connected to process 7325 (/root/vla-smoke-c01/build-formal-a10-20260831/vla-server)
+==PROF== Profiling "void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4>(T1::Params)": 0%....50%....100% - 18 passes
+==PROF== Trying to shutdown target application
+==PROF== Report: /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/raw/vla-steady-r2/ncu-gemm-rid6.ncu-rep

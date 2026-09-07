@@ -26,14 +26,9 @@
 
 ## 当前正式目标环境
 
-阿里云 `ecs.gn7i-c8g1.2xlarge` 已通过 CUDA 与 profiling 可行性验证，详细记录见[阿里云 A10 环境与 profiling 可行性记录](cloud-environment-check-2026-08-09.md)。
+当前唯一正式比较配置是阿里云 A10/CUDA 的 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)。设备、系统、驱动、Toolkit、工具版本和构建条件只在该配置及其[环境记录](../../experiments/a10-cuda-smolvla-20260831-r1/raw/environment-20260831.md)维护；profile 工件状态和模型结论只在[PROFILE-ANALYSIS.md](../../experiments/a10-cuda-smolvla-20260831-r1/PROFILE-ANALYSIS.md)维护。
 
-| 项目 | 当前事实 | 证据范围 |
-|---|---|---|
-| 计算资源 | 16 逻辑 CPU（8 核 / 16 线程）、约 58 GiB RAM、完整 NVIDIA A10 × 1；实测显存 `23028 MiB`，Ampere 架构 | 2026-08-31 当前主机采集，见正式配置环境记录 |
-| 软件环境 | Ubuntu 24.04.4、驱动 `580.126.09`、CUDA Toolkit `12.8.93`、Python `3.12.3` | 2026-08-31 当前主机构建与工具采集 |
-| Profiling | Nsight Systems `2024.6.2` 与 Nsight Compute `2025.1.1.0` 均成功生成报告；硬件计数器访问未出现 `ERR_NVGPUCTRPERM` | 只证明工具、权限和报告导出可用，不构成模型性能结论 |
-| 原始工件 | 正式配置的隔离稳态 Nsight Systems 工件已归档到本仓库；2026-09-01 的模型 NCU 首次尝试仅留下“未采到 kernel”的日志，尚无模型 `.ncu-rep` | 正式工件直接入仓并以 SHA-256 索引；2026-08-09 历史 smoke 报告仍在云实例 `/root` 的历史路径、可访问性未复核，不构成当前模型结论 |
+2026-08-09 的项目负责人环境检查曾确认阿里云 A10 可运行最小 CUDA 程序，并能使用 Nsight Systems、Nsight Compute 与硬件计数器；原始报告、源码和完整命令未入库且不再恢复。这只支持当时的环境选择，不构成当前模型的性能、profile 或瓶颈结论。
 
 ## 正式候选设备筛选条件
 
@@ -48,7 +43,7 @@
 
 ## 环境选择与冻结
 
-- 当前主机的 A10/CUDA 以 `a10-cuda-smolvla-20260831-r1` 为唯一正式比较配置；
+- 当前 A10/CUDA 以 `a10-cuda-smolvla-20260831-r1` 为唯一正式比较配置；其详细事实由对应 `CONFIGURATION.md` 维护；
 - 历史设备、构建产物、随机 smoke 输出及其时间不进入当前配置的性能、profile 或优化前后比较；
 - 当前不购买 GPU，也不迁移本机操作系统；
 - 国产加速卡迁移不进入当前 NVIDIA/CUDA 主闭环；如果后续启动，必须建立新的 `Configuration ID`，不得与 NVIDIA 设备结果组成同一优化前后对比；

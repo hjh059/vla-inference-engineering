@@ -53,10 +53,8 @@ cmake --build /root/vla-smoke-c01/build-formal-a10-20260831 --parallel 16
 
 | 制品 | SHA-256 |
 |---|---|
-| `models/smolvla-libero.gguf` | `6fb2d475c98b4c2cef3e27c4eff4e67b483740cbf983fff320a3b8a5e5f74fe8` |
-| `src/vla.cpp/assets/front.jpg` | `e6f0738ce9184be421dbade5a73900fb33e44c288c475d3985054fbbc4dfb7cf` |
 | `build-formal-a10-20260831/vla-cli` | `392018490e3ca9d7b9d228e11e161a0fbf9c71f57ffc86610c7c9801fedfb43c` |
 | `build-formal-a10-20260831/vla-server` | `c88519243a3f070608272e9a68ee6720a19f926066ea1fa9e094d52e1be33d09` |
 | `build-formal-a10-20260831/vla-bench` | `291e363b67368f382795820c35e93673bc936e618f787e70d9a4bdfa35db9d9c` |
 
-`llama.cpp` 工作树包含 vla.cpp 构建时加入的 CUDA hook 修改；其完整 diff 的 SHA-256 为 `2cf6db3ddb175ed4968ddddee3e2401e473d66f03c004390f7deb62123f533d0`。
+模型、输入资产和 CUDA hook patch 属于冻结配置，其字节身份只在上级 [`CONFIGURATION.md`](../CONFIGURATION.md#冻结条件) 中维护。`llama.cpp` 工作树包含 vla.cpp 构建时加入的 CUDA hook 修改。
