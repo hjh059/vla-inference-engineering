@@ -30,7 +30,7 @@
 
 ## 优化前后比较：优化 01 原生 BF16 GEMM
 
-优化 01 移除了 SmolVLA VLM/action-expert 矩阵乘的默认 `GGML_PREC_F32` 强制，使 BF16 权重使用原生 BF16 GEMM；设定 `VLA_MM_PREC=f32` 可回退至旧路径。变更详情、源码身份、机制、风险和未归档工件见 [OPTIMIZATION-01.md](OPTIMIZATION-01.md)。
+优化 01 移除了 SmolVLA VLM/action-expert 矩阵乘的默认 `GGML_PREC_F32` 强制，使 BF16 权重使用原生 BF16 GEMM；设定 `VLA_MM_PREC=f32` 可回退至旧路径。变更详情、源码身份、机制、风险和未归档工件见 [OPTIMIZATION-01.md](OPTIMIZATION-01.md)，按既有通用流程重跑时的差异见其[复现步骤](OPTIMIZATION-01.md#复现步骤)。
 
 优化后使用相同模型、A10、驱动、CUDA、构建选项、单客户端、`VLA_N_THREADS=16`、固定 JPEG/token/state/noise、5 次预热、30 次顺序样本和相同统计方法。原始样本和摘要位于 [`results/optimization-01-native-bf16/`](results/optimization-01-native-bf16/)，字节身份见 [`raw/optimization-01-artifacts.sha256`](raw/optimization-01-artifacts.sha256)。单位均为 ms，未排除样本。
 
