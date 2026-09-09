@@ -28,10 +28,21 @@
 
 按均值分解，服务端 inference 占 total 约 71.6%，vision 约 27.6%，其余服务端开销约 0.5 ms；客户端 loopback 协议、序列化和请求边界相对服务端 total 的均值差约 2.723 ms。这是端到端分解观察，不是主瓶颈归因。
 
-## 优化前后比较
+## 优化前后比较：优化 01 原生 BF16 GEMM
 
-尚未实施优化，因此暂无优化后结果或收益结论。后续比较必须使用本配置冻结的正确性标准、输入、线程数、预热、30 个样本和统计方法；profile 证据与可证伪优化假设见 [PROFILE-ANALYSIS.md](PROFILE-ANALYSIS.md)。
+优化 01 移除了 SmolVLA VLM/action-expert 矩阵乘的默认 `GGML_PREC_F32` 强制，使 BF16 权重使用原生 BF16 GEMM；设定 `VLA_MM_PREC=f32` 可回退至旧路径。变更详情、源码身份、机制、风险和未归档工件见 [OPTIMIZATION-01.md](OPTIMIZATION-01.md)。
+
+优化后使用相同模型、A10、驱动、CUDA、构建选项、单客户端、`VLA_N_THREADS=16`、固定 JPEG/token/state/noise、5 次预热、30 次顺序样本和相同统计方法。原始样本和摘要位于 [`results/optimization-01-native-bf16/`](results/optimization-01-native-bf16/)，字节身份见 [`raw/optimization-01-artifacts.sha256`](raw/optimization-01-artifacts.sha256)。单位均为 ms，未排除样本。
+
+| 指标 | 基线 mean | 优化后 mean | 变化 | 基线 p50 | 优化后 p50 | 基线 p90 | 优化后 p90 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 客户端端到端 wall time | 70.751 | 57.476 | -18.76% | 70.499 | 57.380 | 71.665 | 57.823 |
+| 服务端 total | 68.027 | 54.789 | -19.46% | 67.786 | 54.684 | 68.946 | 55.143 |
+| 服务端 vision | 18.793 | 18.625 | -0.89% | 18.749 | 18.621 | 18.895 | 18.678 |
+| 服务端 inference | 48.735 | 35.707 | -26.73% | 48.494 | 35.585 | 49.646 | 36.001 |
+
+优化后的固定请求仍满足当前配置的正确性标准：30 次输出均为 50×32、有限，后续 29 次均与该次运行的 reference action 按位一致。它不等价于跨实现数值等价：和基线 reference 的文本比较中，1,600 个值有 350 个在打印精度下不同，最大绝对差约为 `0.002875342`。因此上述结果只能说明固定输入下的可重复性与延迟变化，不能支持动作语义、LIBERO 成功率或真实机器人控制正确性不变的结论。
 
 ## 工件索引
 
-基线的原始样本、摘要和 reference action 位于 `results/`，字节身份由 [`raw/baseline-artifacts.sha256`](raw/baseline-artifacts.sha256) 维护。profile 的原始工件索引、用途和校验和见 [PROFILE-ANALYSIS.md](PROFILE-ANALYSIS.md) 与 [`raw/vla-steady-r2/README.md`](raw/vla-steady-r2/README.md)。
+基线的原始样本、摘要和 reference action 位于 `results/`，字节身份由 [`raw/baseline-artifacts.sha256`](raw/baseline-artifacts.sha256) 维护。优化 01 的小型原始结果和 reference capture 位于 `results/optimization-01-native-bf16/`，字节身份由 [`raw/optimization-01-artifacts.sha256`](raw/optimization-01-artifacts.sha256) 维护。基线 profile 的原始工件索引、用途和校验和见 [PROFILE-ANALYSIS.md](PROFILE-ANALYSIS.md) 与 [`raw/vla-steady-r2/README.md`](raw/vla-steady-r2/README.md)；优化后大型 profile 工件尚未归档。

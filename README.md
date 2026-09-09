@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成正确性与性能基线、隔离稳态 Nsight Systems profile 和两个代表性 kernel 的 Nsight Compute 采集。下一步选择并实施最小优化，再执行同条件正确性回归和性能比较；尚无优化收益结论。基线结果见 [RESULTS.md](experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)，profile 证据和边界见 [PROFILE-ANALYSIS.md](experiments/a10-cuda-smolvla-20260831-r1/PROFILE-ANALYSIS.md)。
+> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成正确性与性能基线、隔离稳态 Nsight Systems profile、两个代表性 kernel 的 Nsight Compute 采集，以及首个最小优化的同条件正确性回归和 30 样本性能比较。原生 BF16 GEMM 路径使客户端端到端均值从 70.751 ms 降至 57.476 ms、服务端 inference 均值从 48.735 ms 降至 35.707 ms；完整条件、风险和证据缺口见 [OPTIMIZATION-01.md](experiments/a10-cuda-smolvla-20260831-r1/OPTIMIZATION-01.md)。优化尚未形成可提交 revision，且优化后的大型 profile 工件尚未归档，因此项目尚未完成最终交付。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 
@@ -64,6 +64,7 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 - [部署与性能优化范围](docs/project/scope.md)
 - [部署基线与优化计划](docs/plans/phase-0.md)
 - [实验记录与工件管理](experiments/README.md)
+- [优化 01：原生 BF16 GEMM](experiments/a10-cuda-smolvla-20260831-r1/OPTIMIZATION-01.md)
 - [路径选择与辅助证据记录](docs/research/issue-candidates.md)
 - [部署平台与资源策略](docs/research/deployment-platforms.md)
 
@@ -71,4 +72,4 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 
 - 项目工件直接保存在本仓库，并以 SHA-256 索引校验；模型本体、构建产物和项目外临时证据不归档。2026-08-09 的历史 profiling smoke 报告尚未恢复，不构成当前模型结论；
 - 模型与运行时代码的许可证文字差异仍需在发布或分发前按冻结 revision 复核；
-- 当前正式性能结论仅限冻结配置下的单请求稳态基线；优化收益、动作语义、LIBERO 任务成功率、跨设备或跨输入泛化、可靠性、机器人控制和生产可用性结论均未成立。
+- 当前性能结论仅限冻结配置下的单请求稳态基线与优化 01 的同条件比较；优化输出并非与基线跨实现数值等价。动作语义、LIBERO 任务成功率、跨设备或跨输入泛化、可靠性、机器人控制和生产可用性结论均未成立；优化版 source commit 与大型 profile 工件也尚待归档。

@@ -47,7 +47,13 @@
 | `k_bin_bcast` | 6.96% |
 | `flash_attn_ext_f16` | 6.67% |
 
-因此，本轮 **确认的主要瓶颈层级** 是 `vla::predict()` 内的 GPU kernel 执行；CPU 端同步是在等待这些 GPU 工作完成。尚未确认的更细粒度根因是：BF16 权重与 F32 激活之间的转换是否是最具性价比的优化点。代码检查显示 SmolVLA 默认将权重解析为 BF16，而主图中的输入和若干投影仍为 F32；通用 BF16 activation helper 说明，标准 `ggml_mul_mat` 会在 BF16 权重与 F32 激活组合中引入 F32↔BF16 转换。该机制与 `convert_unary` 的 27.52% 聚合热点一致，但仍只是 **可证伪假设**，不能据此直接修改模型精度路径。
+因此，本轮 **确认的主要瓶颈层级** 是 `vla::predict()` 内的 GPU kernel 执行；CPU 端同步是在等待这些 GPU 工作完成。
+
+### `convert_unary` 的类型归因更正
+
+原始 `nsys.sqlite` 可按完整 demangled kernel name 重新聚合。对同一 `predict rid=3–12` 范围，`convert_unary<__nv_bfloat16, float>` 有 21,710 次 launch、累计 157.329 ms（约 15.733 ms/请求），是 `convert_unary` 聚合时间的主体；`convert_unary<float, __half>` 为 7,030 次、12.465 ms，`convert_unary<float, __nv_bfloat16>` 为 730 次、10.016 ms，`convert_unary<__half, float>` 为 10 次、0.069 ms。
+
+代码检查显示 SmolVLA 权重默认常驻 BF16，但 `mm_w()` 默认写入 `GGML_PREC_F32`；这与主要的 BF16→F32 转换相符，形成“原生 BF16 GEMM 可减少重复权重扩展”的可证伪假设。该假设随后由优化 01 的同条件性能比较支持，具体结果和精度风险见 [OPTIMIZATION-01.md](OPTIMIZATION-01.md)。
 
 ### Nsight Compute 细粒度验证
 
@@ -57,7 +63,7 @@
 
 | 目标 kernel | 关键 NCU 指标 | 验收结论 |
 |---|---|---|
-| `convert_unary<float, __half>` | DRAM 吞吐 `268.92 GB/s`，为峰值的 `45.30%`；计算吞吐 `41.05%`；实现占用率 `78.21%` | 不支持“全局内存带宽已饱和、该 kernel 受带宽限制”的假设。报告同时显示计算与内存利用率均低于 60%，不能由本次数据确认更细的单一根因。 |
+| `convert_unary<float, __half>` | DRAM 吞吐 `268.92 GB/s`，为峰值的 `45.30%`；计算吞吐 `41.05%`；实现占用率 `78.21%` | 不支持“这个 F32→F16 kernel 已饱和全局内存带宽”的假设。它不是上节主要的 BF16→F32 转换类型，不能将其局部计数器直接外推为后者的根因。 |
 | `cutlass_80_tensorop_s1688gemm_64x64_16x6_tn_align4` `Kernel2` | DRAM 吞吐 `535.68 GB/s`，为峰值的 `89.42%`；计算吞吐 `38.67%`；理论/实现占用率为 `16.67%` / `15.64%` | 非计算受限。动态 shared memory 将理论占用率限制为 `16.67%`；192 个 block 形成一整 wave 加 48-block 尾 wave，NCU 估计该尾部在均匀 block 时最多可占 kernel 时间的 50%。因此该实例同时存在低占用、形状/launch 与尾 wave 约束，并具有高 DRAM 利用率。 |
 
 细粒度结论只适用于这两个代表性 kernel 和冻结配置；它不等价于整个 `vla::predict()` 都由某一单项资源限制，也不构成已实施优化的证据。下一步应只选择与上述证据相符的最小优化，并在同一冻结条件下完成正确性回归和前后性能测量。

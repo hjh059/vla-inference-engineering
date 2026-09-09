@@ -1,0 +1,8 @@
+a09f9c636ce1bd2509bf595a27df6133cb7ee7e3a6f35f27663f253efe744a44  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/samples.csv
+a6a0b3e3dc12a16a251e6f83fd5f08c8fc57d9baac0d9151d7d9d428903d9e21  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/summary.json
+bb0886d6ba0e176557da5f045ad9f20bd55f93e54d5c0356648d90bc0e2df8de  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/reference-capture/samples.csv
+cdf3121ee246ae0a94684ff2b47e9071f92f0a54501ce9ffef9a46ae24b489bf  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/reference-capture/reference-actions.txt
+14ffa8156c4df6d68886160b8f79bf82f3ed9a6db53644650fea43f54dfa6622  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/reference-capture/summary.json
+3c8a41e159b74d64f4b4f4383f9ca5947777ac26615fdafab83dec3d271d00d2  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/f32-rollback-check/samples.csv
+f86a912942bfe5b8777c0c039a824a509468dcec94f21ffe0b7c9a852bbf77ab  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/f32-rollback-check/reference-actions.txt
+14ffa8156c4df6d68886160b8f79bf82f3ed9a6db53644650fea43f54dfa6622  src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/results/optimization-01-native-bf16/f32-rollback-check/summary.json
