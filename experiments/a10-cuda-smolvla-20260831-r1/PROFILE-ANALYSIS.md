@@ -2,7 +2,7 @@
 
 > 采集日期：2026-09-01。本文只维护 profile 的采集范围、观察、硬件计数器分析和结论边界。正式正确性与无 profiler 的 30 样本性能基线见 [RESULTS.md](RESULTS.md)。所有观察仅适用于各节记录的派生 profile 构建、冻结模型、输入、固定 noise、A10、驱动、单客户端和测量协议。
 
-## 历史 profile 工件
+## 已归档 profile 工件
 
 已生成 [`raw/nsys-baseline.nsys-rep`](raw/nsys-baseline.nsys-rep)（1.6 MiB）和由 Nsight Systems 导出的 [`raw/nsys-baseline.sqlite`](raw/nsys-baseline.sqlite)（4.2 MiB）。字节身份统一由 [`raw/profile-artifacts.sha256`](raw/profile-artifacts.sha256) 维护。
 

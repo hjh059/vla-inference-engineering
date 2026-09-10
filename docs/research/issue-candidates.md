@@ -30,7 +30,6 @@
 
 - **正式配置与结果**：模型制品、运行时版本、构建选项、输入、固定 noise 及正确性和测量协议以 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 为准；可复现结果见 [RESULTS.md](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。
 - **选路期外部入口**：[vla.cpp 仓库](https://github.com/VinRobotics/vla.cpp)、[架构说明](https://github.com/VinRobotics/vla.cpp/blob/main/docs/ARCHITECTURE.md)和[项目页面](https://fai-modelopt-tech.github.io/vla-cpp.github.io/)。
-- **历史决策摘要**：冻结正式配置前的早期 smoke 使用的 CLI 不能传入 initial noise，动作数值不能重复。因此正式客户端将 noise 作为冻结输入，并把按位一致性纳入正确性标准；原始 smoke 工件不再单独保留。
 - **许可与边界**：模型与运行时代码的许可证文字仍须在发布或分发前按冻结 revision 复核。固定输入下的数值可重复性不代表动作语义、LIBERO 任务成功率或机器人控制正确性。
 
 ### C-02：π0.5-LIBERO GGUF + Embodied.cpp

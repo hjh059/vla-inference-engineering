@@ -43,33 +43,16 @@ C++、Python、CUDA/TensorRT、Processor、协议和控制端都是候选工具�
 交付可复现结果、取舍与限制
 ```
 
-外部资料核查可辅助说明场景约束、指标、瓶颈和部署路径选择，但不替代本项目的基线、profile 与前后验证。
-
-## 证据规则
-
-官方文档、代码检查、smoke test、受控测量和 profile 结论必须区分。性能结论只适用于固定的模型、版本、设备、输入和测量方法；没有原始结果、正确性验证或足够证据时，结论保持为 `Unknown` 或 `Insufficient evidence`。
-
-外部 Issue、公开 benchmark 和替代方案可作为路径选择或解释限制的参考，不能替代本项目的基线、profile 和前后验证。
-
 ## 完成标准
 
 正式完成标准和必须产出见[项目范围的“必须产出”](docs/project/scope.md#必须产出)；本页只维护仓库入口、状态摘要和导航。
 
 ## 文档
 
-- [文档导航](docs/README.md)
-- [推理路径与输出正确性（可选入门）](docs/concepts/inference-path-and-correctness.md)
-- [可复现实验、测量与 profiling（可选入门）](docs/concepts/reproducible-measurement-and-profiling.md)
-- [项目定位](docs/project/positioning.md)
-- [部署与性能优化范围](docs/project/scope.md)
-- [部署基线与优化计划](docs/plans/phase-0.md)
-- [实验记录与工件管理](experiments/README.md)
-- [优化 01：原生 BF16 GEMM](experiments/a10-cuda-smolvla-20260831-r1/OPTIMIZATION-01.md)
-- [路径选择与辅助证据记录](docs/research/issue-candidates.md)
-- [部署平台与资源策略](docs/research/deployment-platforms.md)
+完整的文档导航、阅读顺序、内容分类和证据规则见[文档导航](docs/README.md)。
 
 ## 当前限制
 
-- 项目工件直接保存在本仓库，并以 SHA-256 索引校验；模型本体、构建产物和项目外临时证据不归档。2026-08-09 的历史 profiling smoke 报告尚未恢复，不构成当前模型结论；
+- 项目工件直接保存在本仓库，并以 SHA-256 索引校验；模型本体、构建产物和项目外临时证据不归档；
 - 模型与运行时代码的许可证文字差异仍需在发布或分发前按冻结 revision 复核；
 - 当前性能结论仅限冻结配置下的单请求稳态基线与优化 01 的同条件比较；优化输出并非与基线跨实现数值等价。动作语义、LIBERO 任务成功率、跨设备或跨输入泛化、可靠性、机器人控制和生产可用性结论均未成立；优化版 source commit 与大型 profile 工件也尚待归档。

@@ -4,9 +4,9 @@
 
 ## 可选入门
 
-
-- [推理路径与输出正确性](concepts/inference-path-and-correctness.md)：VLA 推理路径、动作生成与正确性层级；
-- [可复现实验、测量与 profiling](concepts/reproducible-measurement-and-profiling.md)：基线、性能测量、profile 和优化验证。
+- [机器学习与线性代数基础](concepts/foundations.md)：训练、参数、张量、矩阵计算、GEMM 与数值精度；
+- [VLA 推理路径、动作生成与正确性](concepts/vla-inference-and-correctness.md)：模型制品、Runtime、动作生成、输入输出契约与正确性层级；
+- [可复现实验、性能测量与优化验证](concepts/measurement-and-optimization.md)：基线、性能测量、profile、瓶颈与优化验证。
 
 ## 阅读顺序
 
@@ -16,11 +16,7 @@
 4. [部署基线与优化计划](plans/phase-0.md)：当前进度与下一步；
 5. [实验记录与工件管理](../experiments/README.md)：仓库职责、证据目录和大工件保存规则；
 6. [路径选择与辅助证据记录](research/issue-candidates.md)：候选的决策准则、依据及回退规则；
-7. [部署平台与资源策略](research/deployment-platforms.md)：设备筛选条件、资源决策及历史环境的适用边界。
-
-## 历史原始记录（按需）
-
-- [本地设备只读核验原始输出](research/environment-check-2026-08-09.txt)：2026-08-09 的本机检查命令与输出。
+7. [部署平台与资源策略](research/deployment-platforms.md)：设备筛选条件、当前正式环境入口及历史环境的证据边界。
 
 ## 文档内容类型
 

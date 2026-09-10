@@ -40,10 +40,6 @@
 - 保存每次请求的原始值至 `results/samples.csv`、reference 输出至 `results/reference-actions.txt`、一致性判断至 `results/summary.json`，再从原始样本计算 min/p50/p90/max/mean。
 - profile 使用同一服务协议、同一固定请求与相同输入/noise；profile 运行不混入 30 个正式性能样本。项目生成的 `.nsys-rep`、`.ncu-rep`、日志、导出数据及其 SHA-256 清单直接保存在本配置目录中。
 
-## 已完成的非正式 smoke
-
-2026-08-31 已以新 `vla-cli` 在当前主机加载该模型，日志显示 CUDA device 0（A10, CC 8.6）及 50 行 × 32 列的有限输出。该 CLI 没有传入 noise，因此本次观察仅为环境 smoke，不计入上述正确性或性能基线；正式固定请求的 smoke、正确性和性能工件已按本配置归档。
-
 ## 执行入口
 
 [`BASELINE-RUNBOOK.md`](BASELINE-RUNBOOK.md) 是正式基线的唯一复现流程，固定了基线 checkout、构建、服务启动、客户端参数、输出位置和验收步骤。`scripts/fixed_request_client.cpp` 是本配置唯一的固定请求客户端；其编译入口为 `scripts/build-client.sh`。客户端会拒绝非 50×32 输出、非有限值或与 reference 不同的 action。
