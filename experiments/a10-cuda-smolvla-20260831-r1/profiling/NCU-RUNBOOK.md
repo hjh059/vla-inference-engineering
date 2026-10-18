@@ -1,10 +1,10 @@
 # Nsight Compute 采集说明
 
-本文记录正式配置 `a10-cuda-smolvla-20260831-r1` 已验证有效的 Nsight Compute 过滤条件和复现顺序。Profile 二进制的源码 revision 和构建命令见 [`PROFILE-BUILD.md`](PROFILE-BUILD.md)；硬件计数器结果及结论边界以 [`PROFILE-ANALYSIS.md`](PROFILE-ANALYSIS.md#nsight-compute-细粒度验证) 为准。本页不重复维护构建条件或指标。
+本文记录正式配置 `a10-cuda-smolvla-20260831-r1` 已验证有效的 Nsight Compute 过滤条件和复现顺序。Profile 二进制的源码 revision 和构建命令见 [`BUILD.md`](BUILD.md)；硬件计数器结果及结论边界以 [`ANALYSIS.md`](ANALYSIS.md#nsight-compute-细粒度验证) 为准。本页不重复维护构建条件或指标。
 
 ## 固定条件
 
-- 使用 [Profile 观测构建](PROFILE-BUILD.md)中固定的 `vla.cpp@4e46904efbc57ef4ccff613c2a23cfd1cc335fed` 和对应 CUDA `vla-server`；
+- 使用 [Profile 观测构建](BUILD.md)中固定的 `vla.cpp@4e46904efbc57ef4ccff613c2a23cfd1cc335fed` 和对应 CUDA `vla-server`；
 - 每个目标 kernel 使用全新的服务进程，使唯一计时请求为 `rid=6`；
 - 客户端执行 `--warmup 5 --reps 1`；
 - launch 端使用 `--target-processes all --nvtx`；
@@ -40,7 +40,7 @@ VLA_N_THREADS=16 ncu \
 终端 C：
 
 ```bash
-cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling
 
 ncu \
   --mode=attach \
@@ -63,7 +63,7 @@ ncu \
 先停止上一轮服务并重新执行第 1 节，再在终端 C 执行：
 
 ```bash
-cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling
 
 ncu \
   --mode=attach \
@@ -109,5 +109,5 @@ cd /root/vla-smoke-c01
 
 ```bash
 cd /root/vla-smoke-c01
-sha256sum -c src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/raw/profile-artifacts.sha256
+sha256sum -c src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling/raw/profile-artifacts.sha256
 ```

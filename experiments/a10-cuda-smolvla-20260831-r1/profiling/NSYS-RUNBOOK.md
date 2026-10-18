@@ -1,6 +1,6 @@
 # Nsight Systems 隔离稳态采集说明
 
-本文记录 `vla-steady-r2` 成功采集所对应的可复现流程。Profile 二进制的源码 revision 和构建命令见 [`PROFILE-BUILD.md`](PROFILE-BUILD.md)；冻结输入和客户端协议见 [`CONFIGURATION.md`](CONFIGURATION.md)。
+本文记录 `vla-steady-r2` 成功采集所对应的可复现流程。Profile 二进制的源码 revision 和构建命令见 [`BUILD.md`](BUILD.md)；冻结输入和客户端协议见 [`实验配置`](../baseline/README.md#冻结配置)。
 
 原始逐字 shell transcript 当时没有归档。以下命令由已归档 `nsys.nsys-rep` 的 capture metadata、导出 SQLite、Git 历史中的采集方案和固定客户端参数共同还原；其中会话、服务命令、工作目录、trace 类型、CUDA Graph node、线程数及 `rid=1–12` 范围均可由现有工件复核。
 
@@ -102,4 +102,4 @@ nsys stats \
 - 客户端保存 10 个正式样本，输出均满足冻结正确性标准；
 - profile 延迟只用于范围和热点分析，不替代 30 样本正式性能基线。
 
-当前归档结果、范围验收和指标见 [`PROFILE-ANALYSIS.md`](PROFILE-ANALYSIS.md#隔离稳态-profilevla-steady-r2)，工件用途和大小见 [`raw/vla-steady-r2/README.md`](raw/vla-steady-r2/README.md)。
+当前归档结果、范围验收和指标见 [`ANALYSIS.md`](ANALYSIS.md#隔离稳态-profilevla-steady-r2)，工件用途和大小见 [`raw/vla-steady-r2/README.md`](raw/vla-steady-r2/README.md)。

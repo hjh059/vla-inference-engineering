@@ -57,4 +57,4 @@ cmake --build /root/vla-smoke-c01/build-formal-a10-20260831 --parallel 16
 | `build-formal-a10-20260831/vla-server` | `c88519243a3f070608272e9a68ee6720a19f926066ea1fa9e094d52e1be33d09` |
 | `build-formal-a10-20260831/vla-bench` | `291e363b67368f382795820c35e93673bc936e618f787e70d9a4bdfa35db9d9c` |
 
-模型、输入资产和 CUDA hook patch 属于冻结配置，其字节身份只在上级 [`CONFIGURATION.md`](../CONFIGURATION.md#冻结条件) 中维护。`llama.cpp` 工作树包含 vla.cpp 构建时加入的 CUDA hook 修改。
+模型、输入资产和 CUDA hook patch 属于冻结配置，其字节身份只在上级 [`实验配置`](../README.md#冻结条件) 中维护。`llama.cpp` 工作树包含 vla.cpp 构建时加入的 CUDA hook 修改。

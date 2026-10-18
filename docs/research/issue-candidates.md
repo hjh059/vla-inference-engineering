@@ -14,7 +14,7 @@
 4. 能定义接口/结构正确性标准和单请求端到端主指标；
 5. 能取得足以定位一个主要瓶颈的端到端测量与 GPU profile 工件。
 
-候选设备还须满足[正式候选设备筛选条件](deployment-platforms.md#正式候选设备筛选条件)。训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较不属于首次选路范围。已选路径的实际设备、模型、输入、正确性标准、测量协议与结果以正式 [Configuration ID](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 及其 [RESULTS.md](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md) 为准。
+候选设备还须满足[正式候选设备筛选条件](deployment-platforms.md#正式候选设备筛选条件)。训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较不属于首次选路范围。已选路径的实际设备、模型、输入、正确性标准、测量协议与结果以正式 [Configuration ID](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置) 及其 [结果汇总](../../experiments/a10-cuda-smolvla-20260831-r1/optimization-01/OPTIMIZATION.md#同条件性能比较) 为准。
 
 ## 候选目录
 
@@ -28,7 +28,7 @@
 
 ### C-01：SmolVLA-LIBERO GGUF + vla.cpp
 
-- **正式配置与结果**：模型制品、运行时版本、构建选项、输入、固定 noise 及正确性和测量协议以 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 为准；可复现结果见 [RESULTS.md](../../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)。
+- **正式配置与结果**：模型制品、运行时版本、构建选项、输入、固定 noise 及正确性和测量协议以 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置) 为准；可复现结果见 [结果汇总](../../experiments/a10-cuda-smolvla-20260831-r1/optimization-01/OPTIMIZATION.md#同条件性能比较)。
 - **选路期外部入口**：[vla.cpp 仓库](https://github.com/VinRobotics/vla.cpp)、[架构说明](https://github.com/VinRobotics/vla.cpp/blob/main/docs/ARCHITECTURE.md)和[项目页面](https://fai-modelopt-tech.github.io/vla-cpp.github.io/)。
 - **许可与边界**：模型与运行时代码的许可证文字仍须在发布或分发前按冻结 revision 复核。固定输入下的数值可重复性不代表动作语义、LIBERO 任务成功率或机器人控制正确性。
 
@@ -52,7 +52,7 @@
 
 ## 路径选择结果与回退规则
 
-1. 当前正式比较唯一依据为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)。
+1. 当前正式比较唯一依据为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置)。
 2. 仅当当前正式路径的 profile 证明确实缺少可分析的主要 GPU 工作负载时，才重新评估 C-02。
 3. C-03 继续保留为第一方参考/回退路径；当前不继续扩展或 smoke 其他候选。
 

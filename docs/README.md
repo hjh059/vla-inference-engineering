@@ -1,6 +1,6 @@
 # VLA 推理部署与优化：文档导航
 
-> 当前阶段以仓库入口的[状态摘要](../README.md)为准。正式配置、基线结果、profile 分析和下一步分别见 [`CONFIGURATION.md`](../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)、[`RESULTS.md`](../experiments/a10-cuda-smolvla-20260831-r1/RESULTS.md)、[`PROFILE-ANALYSIS.md`](../experiments/a10-cuda-smolvla-20260831-r1/PROFILE-ANALYSIS.md) 和[执行计划](plans/phase-0.md)；本页只维护文档导航以及项目统一的内容分类、证据强度和测量规则，不重复维护阶段结论。
+> 当前阶段以仓库入口的[状态摘要](../README.md)为准。正式配置、基线结果、profile 分析和下一步分别见 [`实验配置`](../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置)、[`结果汇总`](../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#实验结果)、[Profile 分析](../experiments/a10-cuda-smolvla-20260831-r1/profiling/ANALYSIS.md) 和[执行计划](plans/phase-0.md)；本页只维护文档导航以及项目统一的内容分类、证据强度和测量规则，不重复维护阶段结论。
 
 ## 可选入门
 
@@ -14,7 +14,7 @@
 2. [项目定位](project/positioning.md)：项目动机、能力声明和对外叙述边界；
 3. [部署与性能优化范围](project/scope.md)：唯一的两阶段范围、配置字段和交付要求；
 4. [部署基线与优化计划](plans/phase-0.md)：当前进度与下一步；
-5. [实验记录与工件管理](../experiments/README.md)：仓库职责、证据目录和大工件保存规则；
+5. [实验记录与工件管理](../experiments/ARTIFACT-POLICY.md)：仓库职责、证据目录和大工件保存规则；
 6. [路径选择与辅助证据记录](research/issue-candidates.md)：候选的决策准则、依据及回退规则；
 7. [部署平台与资源策略](research/deployment-platforms.md)：设备筛选条件、当前正式环境入口及历史环境的证据边界。
 
@@ -68,4 +68,4 @@
 6. 不适用字段标记 `N/A`，不能为了填满模板扩大范围；
 7. 不因单次成功、单次失败或性能提升外推为所有模型、硬件或部署路径均适用；
 8. 未经 profile 证据支持的架构扩展、通用框架和生产化设计不进入活跃文档树。
-9. 实验工件的仓库归属、目录和大文件保存方式以[实验记录与工件管理](../experiments/README.md)为准。
+9. 实验工件的仓库归属、目录和大文件保存方式以[实验记录与工件管理](../experiments/ARTIFACT-POLICY.md)为准。

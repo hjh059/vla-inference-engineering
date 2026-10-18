@@ -2,7 +2,7 @@
 
 ## 目标
 
-本计划以[部署与性能优化范围](../project/scope.md#项目目标)为准。当前主闭环只处理正式配置 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)，不扩展为通用 Runtime、跨模型框架或生产控制系统。
+本计划以[部署与性能优化范围](../project/scope.md#项目目标)为准。当前主闭环只处理正式配置 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置)，不扩展为通用 Runtime、跨模型框架或生产控制系统。
 
 ## 当前状态
 
@@ -21,7 +21,7 @@
 
 ## 下一步
 
-优化 01 的机制、实现、固定输入回归、性能比较和未验证边界见 [OPTIMIZATION-01.md](../../experiments/a10-cuda-smolvla-20260831-r1/OPTIMIZATION-01.md)。其性能结论不能扩大到其他模型、输入或设备，也不能据此主张动作语义保持不变。必要的复现入口仍为 [Nsight Systems](../../experiments/a10-cuda-smolvla-20260831-r1/NSYS-RUNBOOK.md)、[Nsight Compute](../../experiments/a10-cuda-smolvla-20260831-r1/NCU-RUNBOOK.md) 与[原始 profile 工件索引](../../experiments/a10-cuda-smolvla-20260831-r1/raw/vla-steady-r2/README.md)。
+优化 01 的机制、实现、固定输入回归、性能比较和未验证边界见 [优化 01](../../experiments/a10-cuda-smolvla-20260831-r1/optimization-01/OPTIMIZATION.md)。其性能结论不能扩大到其他模型、输入或设备，也不能据此主张动作语义保持不变。必要的复现入口仍为 [Nsight Systems](../../experiments/a10-cuda-smolvla-20260831-r1/profiling/NSYS-RUNBOOK.md)、[Nsight Compute](../../experiments/a10-cuda-smolvla-20260831-r1/profiling/NCU-RUNBOOK.md) 与[原始 profile 工件索引](../../experiments/a10-cuda-smolvla-20260831-r1/profiling/raw/vla-steady-r2/README.md)。
 
 1. 将当前最小 diff 固化为 `vla.cpp` commit，并在优化记录中以该 commit 替换工作树 diff 身份；
 2. 将已采集的优化后 Nsight Systems `.nsys-rep`、SQLite、日志和校验和移入当前 Configuration ID 的工件目录，或按同一条件重采；

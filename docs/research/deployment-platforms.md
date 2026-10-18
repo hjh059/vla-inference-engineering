@@ -1,10 +1,10 @@
 # 部署平台与资源策略
 
-> 状态：2026-08-31 当前主机的 A10/CUDA 配置已冻结为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)。本文记录正式候选设备筛选条件与当前正式环境入口，不是采购计划。
+> 状态：2026-08-31 当前主机的 A10/CUDA 配置已冻结为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置)。本文记录正式候选设备筛选条件与当前正式环境入口，不是采购计划。
 
 ## 当前正式目标环境
 
-当前唯一正式比较配置是阿里云 A10/CUDA 的 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md)。设备、系统、驱动、Toolkit、工具版本和构建条件只在该配置及其[环境记录](../../experiments/a10-cuda-smolvla-20260831-r1/raw/environment-20260831.md)维护；profile 工件状态和模型结论只在[PROFILE-ANALYSIS.md](../../experiments/a10-cuda-smolvla-20260831-r1/PROFILE-ANALYSIS.md)维护。
+当前唯一正式比较配置是阿里云 A10/CUDA 的 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置)。设备、系统、驱动、Toolkit、工具版本和构建条件只在该配置及其[环境记录](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/raw/environment-20260831.md)维护；profile 工件状态和模型结论只在[Profile 分析](../../experiments/a10-cuda-smolvla-20260831-r1/profiling/ANALYSIS.md)维护。
 
 2026-08-09 的项目负责人环境检查曾确认阿里云 A10 可运行最小 CUDA 程序，并能使用 Nsight Systems、Nsight Compute 与硬件计数器；这只支持当时的环境选择，不构成当前模型的性能、profile 或瓶颈结论。
 

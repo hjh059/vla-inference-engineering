@@ -2,7 +2,7 @@
 
 面向求职的 VLA 推理部署与优化项目（VLA Inference Deployment & Optimization）。完成可行性选择后，项目将在一组冻结的模型、设备和任务配置上跑通现有部署路径，建立可复现的正确性与性能基线，用 profiling 定位一个主要瓶颈，完成有因果依据的优化，并以相同条件下的前后指标验证结果。
 
-> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/CONFIGURATION.md) 已完成正确性与性能基线、隔离稳态 Nsight Systems profile、两个代表性 kernel 的 Nsight Compute 采集，以及首个最小优化的同条件正确性回归和 30 样本性能比较。原生 BF16 GEMM 路径使客户端端到端均值从 70.751 ms 降至 57.476 ms、服务端 inference 均值从 48.735 ms 降至 35.707 ms；完整条件、风险和证据缺口见 [OPTIMIZATION-01.md](experiments/a10-cuda-smolvla-20260831-r1/OPTIMIZATION-01.md)。优化尚未形成可提交 revision，且优化后的大型 profile 工件尚未归档，因此项目尚未完成最终交付。
+> 当前状态：正式配置 [`a10-cuda-smolvla-20260831-r1`](experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置) 已完成正确性与性能基线、隔离稳态 Nsight Systems profile、两个代表性 kernel 的 Nsight Compute 采集，以及首个最小优化的同条件正确性回归和 30 样本性能比较。原生 BF16 GEMM 路径使客户端端到端均值从 70.751 ms 降至 57.476 ms、服务端 inference 均值从 48.735 ms 降至 35.707 ms；完整条件、风险和证据缺口见 [优化 01](experiments/a10-cuda-smolvla-20260831-r1/optimization-01/OPTIMIZATION.md)。优化尚未形成可提交 revision，且优化后的大型 profile 工件尚未归档，因此项目尚未完成最终交付。
 >
 > “固定”指正式基线开始前冻结一组实验配置，不表示在项目启动时预设最终 Runtime、通用架构或生产控制链路。
 

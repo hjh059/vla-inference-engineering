@@ -1,6 +1,6 @@
 # VLA 推理路径、动作生成与正确性
 
-本文介绍从模型制品到动作输出的 VLA 推理路径、主要动作生成方法及正确性的分层理解。它只说明通用概念；当前选定模型、Runtime、配置和实验结论以[项目范围](../project/scope.md)、[执行计划](../plans/phase-0.md)和[实验记录](../../experiments/README.md)为准。
+本文介绍从模型制品到动作输出的 VLA 推理路径、主要动作生成方法及正确性的分层理解。它只说明通用概念；当前选定模型、Runtime、配置和实验结论以[项目范围](../project/scope.md)、[执行计划](../plans/phase-0.md)和[实验记录](../../experiments/ARTIFACT-POLICY.md)为准。
 
 ## 模型推理与部署路径
 
