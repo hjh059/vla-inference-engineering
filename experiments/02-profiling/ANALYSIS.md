@@ -1,6 +1,6 @@
 # Profile 分析：`a10-cuda-smolvla-20260831-r1`
 
-> 采集日期：2026-09-01。本文只维护 profile 的采集范围、观察、硬件计数器分析和结论边界。正式正确性与无 profiler 的 30 样本性能基线见 [结果汇总](../baseline/README.md#实验结果)。所有观察仅适用于各节记录的派生 profile 构建、冻结模型、输入、固定 noise、A10、驱动、单客户端和测量协议。
+> 采集日期：2026-09-01。本文只维护 profile 的采集范围、观察、硬件计数器分析和结论边界。正式正确性与无 profiler 的 30 样本性能基线见 [结果汇总](../01-baseline/README.md#实验结果)。所有观察仅适用于各节记录的派生 profile 构建、冻结模型、输入、固定 noise、A10、驱动、单客户端和测量协议。
 
 ## 已归档 profile 工件
 
@@ -53,7 +53,7 @@
 
 原始 `nsys.sqlite` 可按完整 demangled kernel name 重新聚合。对同一 `predict rid=3–12` 范围，`convert_unary<__nv_bfloat16, float>` 有 21,710 次 launch、累计 157.329 ms（约 15.733 ms/请求），是 `convert_unary` 聚合时间的主体；`convert_unary<float, __half>` 为 7,030 次、12.465 ms，`convert_unary<float, __nv_bfloat16>` 为 730 次、10.016 ms，`convert_unary<__half, float>` 为 10 次、0.069 ms。
 
-代码检查显示 SmolVLA 权重默认常驻 BF16，但 `mm_w()` 默认写入 `GGML_PREC_F32`；这与主要的 BF16→F32 转换相符，形成“原生 BF16 GEMM 可减少重复权重扩展”的可证伪假设。该假设随后由优化 01 的同条件性能比较支持，具体结果和精度风险见 [优化 01](../optimization-01/OPTIMIZATION.md)。
+代码检查显示 SmolVLA 权重默认常驻 BF16，但 `mm_w()` 默认写入 `GGML_PREC_F32`；这与主要的 BF16→F32 转换相符，形成“原生 BF16 GEMM 可减少重复权重扩展”的可证伪假设。该假设随后由优化 01 的同条件性能比较支持，具体结果和精度风险见 [优化 01](../03-optimization-01/OPTIMIZATION.md)。
 
 ### Nsight Compute 细粒度验证
 

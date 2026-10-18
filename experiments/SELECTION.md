@@ -1,8 +1,21 @@
-# 路径选择与辅助证据记录
+# 模型、运行时与设备选择
 
-> 状态：路径选择已完成。本文保留选定路径、候选回退路径与相关辅助证据；文件名沿用历史链接。
+本文记录首个正式基线的路径选择依据、设备筛选条件、候选回退路径和辅助资料。选路已完成；实际冻结配置与测量结果以对应实验的阶段记录为准，外部资料不替代本地验证。
 
-本文只记录正式基线路径的选择理由、候选回退路径和辅助外部资料。公开 Issue、README、benchmark 或维护者讨论可以帮助解释场景约束、已有路径或已知限制，但不是本项目的性能或正确性证据。选定路径的冻结条件与结果只链接到对应的正式实验记录，不在本文重复维护。
+## 设备筛选条件
+
+当前正式候选设备采用以下筛选条件：
+
+- NVIDIA Ampere 或更新架构；
+- 单卡显存不少于 24 GB；
+- 能运行 Nsight Systems 和 Nsight Compute；
+- 能读取 GPU hardware performance counters 并导出原始 profile 工件。
+
+16 GB 只作为部分模型可能达到的最低推理线，不作为当前项目的默认筛选线；具体显存需求仍须由选定模型/checkpoint 的固定版本验证。
+
+## 设备选择依据
+
+2026-08-09 的项目负责人环境检查曾确认阿里云 A10 可运行最小 CUDA 程序，并能使用 Nsight Systems、Nsight Compute 与硬件计数器；这只支持当时的环境选择，不构成当前模型的性能、profile 或瓶颈结论。
 
 ## 决策准则
 
@@ -14,7 +27,7 @@
 4. 能定义接口/结构正确性标准和单请求端到端主指标；
 5. 能取得足以定位一个主要瓶颈的端到端测量与 GPU profile 工件。
 
-候选设备还须满足[正式候选设备筛选条件](deployment-platforms.md#正式候选设备筛选条件)。训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较不属于首次选路范围。已选路径的实际设备、模型、输入、正确性标准、测量协议与结果以正式 [Configuration ID](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置) 及其 [结果汇总](../../experiments/a10-cuda-smolvla-20260831-r1/optimization-01/OPTIMIZATION.md#同条件性能比较) 为准。
+候选设备还须满足[正式候选设备筛选条件](SELECTION.md#设备筛选条件)。训练、真实机器人动作、在线控制闭环、多请求吞吐和跨设备性能比较不属于首次选路范围。已选路径的实际设备、模型、输入、正确性标准、测量协议与结果以正式 [Configuration ID](01-baseline/README.md#冻结配置) 及其 [结果汇总](03-optimization-01/OPTIMIZATION.md#同条件性能比较) 为准。
 
 ## 候选目录
 
@@ -22,13 +35,13 @@
 |---|---|---|
 | C-01 | `Selected baseline` | [SmolVLA-LIBERO GGUF + vla.cpp](#c-01smolvla-libero-gguf--vlacpp) |
 | C-02 | `Candidate`（P2） | [π0.5-LIBERO GGUF + Embodied.cpp](#c-02π05-libero-gguf--embodiedcpp) |
-| C-03 | `Candidate`（P3） | [GR00T N1.7 LIBERO + NVIDIA Isaac-GR00T](#c-03groot-n17-libero--nvidia-isaac-groot) |
+| C-03 | `Candidate`（P3） | [GR00T N1.7 LIBERO + NVIDIA Isaac-GR00T](#c-03gr00t-n17-libero--nvidia-isaac-gr00t) |
 
 ## 候选组合详情
 
 ### C-01：SmolVLA-LIBERO GGUF + vla.cpp
 
-- **正式配置与结果**：模型制品、运行时版本、构建选项、输入、固定 noise 及正确性和测量协议以 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置) 为准；可复现结果见 [结果汇总](../../experiments/a10-cuda-smolvla-20260831-r1/optimization-01/OPTIMIZATION.md#同条件性能比较)。
+- **正式配置与结果**：模型制品、运行时版本、构建选项、输入、固定 noise 及正确性和测量协议以 [`a10-cuda-smolvla-20260831-r1`](01-baseline/README.md#冻结配置) 为准；可复现结果见 [结果汇总](03-optimization-01/OPTIMIZATION.md#同条件性能比较)。
 - **选路期外部入口**：[vla.cpp 仓库](https://github.com/VinRobotics/vla.cpp)、[架构说明](https://github.com/VinRobotics/vla.cpp/blob/main/docs/ARCHITECTURE.md)和[项目页面](https://fai-modelopt-tech.github.io/vla-cpp.github.io/)。
 - **许可与边界**：模型与运行时代码的许可证文字仍须在发布或分发前按冻结 revision 复核。固定输入下的数值可重复性不代表动作语义、LIBERO 任务成功率或机器人控制正确性。
 
@@ -52,7 +65,7 @@
 
 ## 路径选择结果与回退规则
 
-1. 当前正式比较唯一依据为 [`a10-cuda-smolvla-20260831-r1`](../../experiments/a10-cuda-smolvla-20260831-r1/baseline/README.md#冻结配置)。
+1. 当前正式比较唯一依据为 [`a10-cuda-smolvla-20260831-r1`](01-baseline/README.md#冻结配置)。
 2. 仅当当前正式路径的 profile 证明确实缺少可分析的主要 GPU 工作负载时，才重新评估 C-02。
 3. C-03 继续保留为第一方参考/回退路径；当前不继续扩展或 smoke 其他候选。
 
@@ -65,5 +78,3 @@
 - `Selected baseline`：已冻结为正式实验配置；
 - `Deferred`：当前资源、兼容性或场景不合适；
 - `Reference only`：仅保留为场景、指标或限制的辅助资料。
-
-当前进度与下一步见[端到端部署与性能优化计划](../plans/phase-0.md)；证据强度和测量规则见[文档导航](../README.md#证据强度)，交付要求见[部署与性能优化范围](../project/scope.md#必须产出)。

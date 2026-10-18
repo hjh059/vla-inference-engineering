@@ -12,7 +12,7 @@ vla.cpp@4e46904efbc57ef4ccff613c2a23cfd1cc335fed
 
 ## 构建命令
 
-使用干净的独立 checkout，并在满足 [`实验配置`](../baseline/README.md#冻结条件) 中工具链和依赖条件后执行：
+使用干净的独立 checkout，并在满足 [`实验配置`](../01-baseline/README.md#冻结条件) 中工具链和依赖条件后执行：
 
 ```bash
 cd /root/vla-smoke-c01
@@ -40,7 +40,7 @@ cmake --build build-formal-a10-20260831 \
 
 ```bash
 cd /root/vla-smoke-c01
-sha256sum -c src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling/raw/profile-artifacts.sha256
+sha256sum -c src/vla-inference-engineering/experiments/02-profiling/raw/profile-artifacts.sha256
 ```
 
 该清单还包含 profile 工件，因此命令会同时验证当前目录下的观测构建和已归档报告。基线构建快照与 profile 构建不是同一制品；profile 的适用范围见 [`ANALYSIS.md`](ANALYSIS.md)。

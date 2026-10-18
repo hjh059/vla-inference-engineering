@@ -74,14 +74,14 @@ cmake -S src/vla.cpp \
   -DCMAKE_CUDA_ARCHITECTURES=86
 cmake --build build-formal-a10-20260831 --parallel 16
 
-bash src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/baseline/scripts/build-client.sh
+bash src/vla-inference-engineering/experiments/01-baseline/scripts/build-client.sh
 ```
 
 构建目录是冻结构建条件的一部分：更换目录可能改变 ELF `RUNPATH`，因此不能期待得到原始客户端或服务二进制的相同 SHA-256。要核验已归档的基线客户端和原始结果字节身份，可执行：
 
 ```bash
 cd /root/vla-smoke-c01
-sha256sum -c src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/baseline/raw/baseline-artifacts.sha256
+sha256sum -c src/vla-inference-engineering/experiments/01-baseline/raw/baseline-artifacts.sha256
 ```
 
 该清单核验的是归档结果和此目录下的重建客户端；它不要求新的时间样本逐字节等同于历史样本。

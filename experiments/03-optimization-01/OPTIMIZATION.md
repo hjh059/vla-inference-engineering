@@ -8,11 +8,11 @@
 
 假设是：不再强制 F32 precision，让 CUDA 以 BF16 权重的原生路径执行这些 GEMM，可将重复的 BF16→F32 转换替换为输入侧 F32→BF16 转换，并降低总推理时间。代价是矩阵乘输入精度和输出数值可能变化；因此不声称与基线按位等价，也不宣称动作语义或任务成功率不变。
 
-此前 NCU 采集的 `convert_unary<float, __half>` 不是上述主要转换类型，不能用于断言 BF16→F32 kernel 的微观瓶颈；其结论边界已在 [Profile 分析](../profiling/ANALYSIS.md) 更正。
+此前 NCU 采集的 `convert_unary<float, __half>` 不是上述主要转换类型，不能用于断言 BF16→F32 kernel 的微观瓶颈；其结论边界已在 [Profile 分析](../02-profiling/ANALYSIS.md) 更正。
 
 ## 实现与回退
 
-[`smolvla.cpp`](../../../../vla.cpp/src/models/smolvla.cpp) 中 `tower_mm_f32_prec()` 改为默认不设置 `GGML_PREC_F32`。在 BF16 权重的冻结路径中，这会选择原生 BF16 GEMM。设置 `VLA_MM_PREC=f32` 可恢复改动前的 F32 precision 行为。
+[`smolvla.cpp`](../../../vla.cpp/src/models/smolvla.cpp) 中 `tower_mm_f32_prec()` 改为默认不设置 `GGML_PREC_F32`。在 BF16 权重的冻结路径中，这会选择原生 BF16 GEMM。设置 `VLA_MM_PREC=f32` 可恢复改动前的 F32 precision 行为。
 
 除这一默认选择外，模型、设备、驱动、CUDA Toolkit、CMake 选项、线程数、输入、noise、warm-up、样本数及统计方法均保持正式配置不变。
 
@@ -20,7 +20,7 @@
 
 ## 复现步骤
 
-本节只记录优化版相对正式基线的必要差异。服务启动、固定输入、客户端协议、5 次 warm-up、30 次计时、统计方法、结果落盘和验收仍以 [基线复现流程](../baseline/README.md#复现步骤) 为唯一流程来源；Nsight 采集仍以 [NSYS-RUNBOOK.md](../profiling/NSYS-RUNBOOK.md) 为唯一流程来源，不在本文复制这些通用步骤。
+本节只记录优化版相对正式基线的必要差异。服务启动、固定输入、客户端协议、5 次 warm-up、30 次计时、统计方法、结果落盘和验收仍以 [基线复现流程](../01-baseline/README.md#复现步骤) 为唯一流程来源；Nsight 采集仍以 [NSYS-RUNBOOK.md](../02-profiling/NSYS-RUNBOOK.md) 为唯一流程来源，不在本文复制这些通用步骤。
 
 ### 固定版本与干净构建
 
@@ -54,13 +54,13 @@ ctest --test-dir build-opt-a10-native-bf16-repro \
   --output-on-failure -R '^bf16_cuda_ops$'
 ```
 
-启用 `GGML_CUDA=ON` 时，上述 CMake 配置会自动运行现有的 [`scripts/patch_ggml_cuda_ext_hook.py`](../../../../vla.cpp/scripts/patch_ggml_cuda_ext_hook.py)，并修改该构建目录 FetchContent 的 `ggml/src/ggml-cuda/ggml-cuda.cu`。这是既有 BF16 CUDA hook 的构建期补丁，不是优化 01 新增的手工修改；不得再单独编辑该 FetchContent 文件。固定请求客户端仍使用基线 runbook 的现有构建流程，仅将其 `build_dir` 替换为 `build-opt-a10-native-bf16-repro`。
+启用 `GGML_CUDA=ON` 时，上述 CMake 配置会自动运行现有的 [`scripts/patch_ggml_cuda_ext_hook.py`](../../../vla.cpp/scripts/patch_ggml_cuda_ext_hook.py)，并修改该构建目录 FetchContent 的 `ggml/src/ggml-cuda/ggml-cuda.cu`。这是既有 BF16 CUDA hook 的构建期补丁，不是优化 01 新增的手工修改；不得再单独编辑该 FetchContent 文件。固定请求客户端仍使用基线 runbook 的现有构建流程，仅将其 `build_dir` 替换为 `build-opt-a10-native-bf16-repro`。
 
 ### 运行差异、回退和 profile
 
-默认不设置 `VLA_MM_PREC` 即为优化路径。按[基线复现步骤](../baseline/README.md#复现步骤)运行时，只将服务端与客户端二进制目录从 `build-formal-a10-20260831` 替换为 `build-opt-a10-native-bf16-repro`；其他服务启动、固定输入、5 次 warm-up、30 次计时、统计和结果落盘要求均不变，且新的复现输出不得覆盖归档的优化结果。
+默认不设置 `VLA_MM_PREC` 即为优化路径。按[基线复现步骤](../01-baseline/README.md#复现步骤)运行时，只将服务端与客户端二进制目录从 `build-formal-a10-20260831` 替换为 `build-opt-a10-native-bf16-repro`；其他服务启动、固定输入、5 次 warm-up、30 次计时、统计和结果落盘要求均不变，且新的复现输出不得覆盖归档的优化结果。
 
-`VLA_MM_PREC=f32` 是回退验证路径。它同样复用基线流程，但其 `reference-actions.txt` 必须与基线的 `../baseline/results/reference-actions.txt` 逐字节一致；回退运行应写到单独的新输出目录。
+`VLA_MM_PREC=f32` 是回退验证路径。它同样复用基线流程，但其 `reference-actions.txt` 必须与基线的 `../01-baseline/results/reference-actions.txt` 逐字节一致；回退运行应写到单独的新输出目录。
 
 Nsight Systems 完整复用 NSYS-RUNBOOK：只将 profile 的服务二进制替换为 `build-opt-a10-native-bf16-repro/vla-server`，并使用新的 run ID 及对应的新输出路径。不得覆盖基线 `vla-steady-r2` 的 profile 工件或其索引。
 
@@ -76,7 +76,7 @@ Nsight Systems 完整复用 NSYS-RUNBOOK：只将 profile 的服务二进制替�
 
 ## 同条件性能比较
 
-冻结配置与基线详情见 [README.md](../baseline/README.md)。本节仅记录无 profiler 条件下的正式性能比较。
+冻结配置与基线详情见 [README.md](../01-baseline/README.md)。本节仅记录无 profiler 条件下的正式性能比较。
 
 优化后使用相同模型、A10、驱动、CUDA、构建选项、单客户端、`VLA_N_THREADS=16`、固定 JPEG/token/state/noise、5 次预热、30 次顺序样本和相同统计方法。原始样本和摘要位于 [`results/`](results/)，字节身份见 [`raw/optimization-01-artifacts.sha256`](raw/optimization-01-artifacts.sha256)。单位均为 ms，未排除样本。
 
@@ -95,4 +95,10 @@ percentile 使用基线相同的线性插值方法。
 
 优化后额外采集了一份带完整 NVTX 嵌套范围的 trace：12 个 `request` 和 12 个 `predict` 范围均闭合，10 个正式请求内不再出现 `convert_unary<__nv_bfloat16, float>`，而 `convert_unary<float, __nv_bfloat16>` 为 22,440 次、43.928 ms（约 4.393 ms/请求）。该观察与性能变化方向一致。
 
-该 trace 的 `.nsys-rep` 与 SQLite 仍仅在项目外临时目录，未进入本仓库的工件清单；按[工件管理规则](../../ARTIFACT-POLICY.md)它不能作为长期有效证据。发布或宣称项目闭环完成前，仍需：归档该 trace 及校验和、将优化以可追溯 commit 固化、并在适当场景补充动作语义或任务级评估。
+该 trace 的 `.nsys-rep` 与 SQLite 仍仅在项目外临时目录，未进入本仓库的工件清单；按[工件管理规则](../README.md#工件保存规则)它不能作为长期有效证据。该 trace 仍待归档。
+
+## 待办
+
+- 归档已采集的优化后 Nsight Systems `.nsys-rep`、SQLite 和日志，并更新校验清单；若临时工件不可用，则按相同条件重新采集。
+- 归档后复核本次优化的原始结果、校验清单和文档链接，补全验证记录。
+- 如需扩大正确性主张，另行开展动作语义或 LIBERO 任务级验证；当前固定输入的数值可重复性不能替代该验证。

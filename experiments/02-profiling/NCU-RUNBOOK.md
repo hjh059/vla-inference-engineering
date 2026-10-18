@@ -40,7 +40,7 @@ VLA_N_THREADS=16 ncu \
 终端 C：
 
 ```bash
-cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/profiling
 
 ncu \
   --mode=attach \
@@ -63,7 +63,7 @@ ncu \
 先停止上一轮服务并重新执行第 1 节，再在终端 C 执行：
 
 ```bash
-cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling
+cd /root/vla-smoke-c01/src/vla-inference-engineering/experiments/profiling
 
 ncu \
   --mode=attach \
@@ -109,5 +109,5 @@ cd /root/vla-smoke-c01
 
 ```bash
 cd /root/vla-smoke-c01
-sha256sum -c src/vla-inference-engineering/experiments/a10-cuda-smolvla-20260831-r1/profiling/raw/profile-artifacts.sha256
+sha256sum -c src/vla-inference-engineering/experiments/02-profiling/raw/profile-artifacts.sha256
 ```
